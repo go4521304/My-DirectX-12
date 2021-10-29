@@ -304,6 +304,10 @@ void CGameObject::Animate(float fTimeElapsed)
 {
 }
 
+void CGameObject::Animate(float fTimeElapsed, CCamera* pCamera)
+{
+}
+
 void CGameObject::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera)
 {
 	OnPrepareRender();

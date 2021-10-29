@@ -587,35 +587,6 @@ CBillboardShader::~CBillboardShader()
 {
 }
 
-void CBillboardShader::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
-{
-	UINT ncbElementBytes = ((sizeof(CB_GAMEOBJECT_INFO) + 255) & ~255); //256ÀÇ ¹è¼ö
-	m_pd3dcbGameObjects = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbElementBytes * m_nObjects, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
-
-	m_pd3dcbGameObjects->Map(0, NULL, (void**)&m_pcbMappedGameObjects);
-}
-
-void CBillboardShader::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
-{
-	UINT ncbElementBytes = ((sizeof(CB_GAMEOBJECT_INFO) + 255) & ~255);
-	for (int j = 0; j < m_nObjects; j++)
-	{
-		CB_GAMEOBJECT_INFO* pbMappedcbGameObject = (CB_GAMEOBJECT_INFO*)((UINT8*)m_pcbMappedGameObjects + (j * ncbElementBytes));
-		XMStoreFloat4x4(&pbMappedcbGameObject->m_xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(&m_ppObjects[j]->m_xmf4x4World)));
-	}
-}
-
-void CBillboardShader::ReleaseShaderVariables()
-{
-	if (m_pd3dcbGameObjects)
-	{
-		m_pd3dcbGameObjects->Unmap(0, NULL);
-		m_pd3dcbGameObjects->Release();
-	}
-
-	CTexturedShader::ReleaseShaderVariables();
-}
-
 void CBillboardShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, void* pContext)
 {
 	CHeightMapTerrain* pTerrain = (CHeightMapTerrain*)pContext;
@@ -655,20 +626,20 @@ void CBillboardShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 
 	CTexturedRectMesh* pRectMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, fxSize, fySize, 0.0f);
 
-	m_ppObjects = new CBillboardObject * [m_nObjects];
+	m_ppObjects = new CGameObject * [m_nObjects];
 
 	XMFLOAT3 xmf3RotateAxis, xmf3SurfaceNormal;
-	CBillboardObject* pBillTreeObject = NULL;
+	CBillboardObject* pBillboardObject = NULL;
 	for (int i = 0, x = 0; x < xObjects; x++)
 	{
 		for (int z = 0; z < zObjects; z++)
 		{
 			for (int y = 0; y < yObjects; y++)
 			{
-				pBillTreeObject = new CBillboardObject;
-				pBillTreeObject->SetMesh(0, pRectMesh);
+				pBillboardObject = new CBillboardObject;
+				pBillboardObject->SetMesh(0, pRectMesh);
 #ifndef _WITH_BATCH_MATERIAL
-				pBillTreeObject->SetMaterial(pRectMaterial);
+				pBillboardObject->SetMaterial(pRectMaterial);
 #endif
 				//float xPosition = x * fxPitch;
 				//float zPosition = z * fzPitch;
@@ -678,35 +649,22 @@ void CBillboardShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 
 				float fHeight = pTerrain->GetHeight(xPosition, zPosition);
 
-				pBillTreeObject->SetPosition(xPosition, fHeight + (y * 3.0f * fyPitch) + (fySize / 2), zPosition);
+				pBillboardObject->SetPosition(xPosition, fHeight + (y * 3.0f * fyPitch) + (fySize / 2), zPosition);
 				if (y == 0)
 				{
 					xmf3SurfaceNormal = pTerrain->GetNormal(xPosition, zPosition);
 					xmf3RotateAxis = Vector3::CrossProduct(XMFLOAT3(0.0f, 1.0f, 0.0f), xmf3SurfaceNormal);
 					if (Vector3::IsZero(xmf3RotateAxis)) xmf3RotateAxis = XMFLOAT3(0.0f, 1.0f, 0.0f);
 					float fAngle = acos(Vector3::DotProduct(XMFLOAT3(0.0f, 1.0f, 0.0f), xmf3SurfaceNormal));
-					pBillTreeObject->Rotate(&xmf3RotateAxis, XMConvertToDegrees(fAngle));
+					pBillboardObject->Rotate(&xmf3RotateAxis, XMConvertToDegrees(fAngle));
 				}
-				pBillTreeObject->SetRotationAxis(XMFLOAT3(0.0f, 1.0f, 0.0f));
-				pBillTreeObject->SetCbvGPUDescriptorHandlePtr(m_d3dCbvGPUDescriptorStartHandle.ptr + (::gnCbvSrvDescriptorIncrementSize * i));
-				m_ppObjects[i++] = pBillTreeObject; 
+				pBillboardObject->SetRotationAxis(XMFLOAT3(0.0f, 1.0f, 0.0f));
+				pBillboardObject->SetCbvGPUDescriptorHandlePtr(m_d3dCbvGPUDescriptorStartHandle.ptr + (::gnCbvSrvDescriptorIncrementSize * i));
+				m_ppObjects[i++] = pBillboardObject;
 			}
 		}
 	}
 	
-}
-
-void CBillboardShader::ReleaseObjects()
-{
-	if (m_ppObjects)
-	{
-		for (int j = 0; j < m_nObjects; j++) if (m_ppObjects[j]) delete m_ppObjects[j];
-		delete[] m_ppObjects;
-	}
-
-#ifdef _WITH_BATCH_MATERIAL
-	if (m_pMaterial) delete m_pMaterial;
-#endif
 }
 
 void CBillboardShader::AnimateObjects(float fTimeElapsed, CCamera* pCamera)
@@ -717,43 +675,9 @@ void CBillboardShader::AnimateObjects(float fTimeElapsed, CCamera* pCamera)
 	}
 }
 
-void CBillboardShader::ReleaseUploadBuffers()
-{
-	if (m_ppObjects)
-	{
-		for (int j = 0; j < m_nObjects; j++) if (m_ppObjects[j]) m_ppObjects[j]->ReleaseUploadBuffers();
-	}
-
-#ifdef _WITH_BATCH_MATERIAL
-	if (m_pMaterial) m_pMaterial->ReleaseUploadBuffers();
-#endif
-}
-
-void CBillboardShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
-{
-	CTexturedShader::Render(pd3dCommandList, pCamera);
-
-#ifdef _WITH_BATCH_MATERIAL
-	if (m_pMaterial) m_pMaterial->UpdateShaderVariables(pd3dCommandList);
-#endif
-
-	for (int j = 0; j < m_nObjects; j++)
-	{
-		if (m_ppObjects[j]) m_ppObjects[j]->Render(pd3dCommandList, pCamera);
-	}
-}
-
 D3D12_SHADER_BYTECODE CBillboardShader::CreatePixelShader(ID3DBlob** ppd3dShaderBlob)
 {
 	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "PSBillTree", "ps_5_1", ppd3dShaderBlob));
-}
-
-void CBillboardShader::CreateShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature)
-{
-	m_nPipelineStates = 1;
-	m_ppd3dPipelineStates = new ID3D12PipelineState * [m_nPipelineStates];
-
-	CShader::CreateShader(pd3dDevice, pd3dGraphicsRootSignature);
 }
 
 D3D12_BLEND_DESC CBillboardShader::CreateBlendState()

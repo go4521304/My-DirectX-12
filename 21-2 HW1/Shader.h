@@ -169,7 +169,7 @@ public:
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
-class CBillboardShader : public CTexturedShader
+class CBillboardShader : public CObjectsShader
 {
 public:
 	CBillboardShader();
@@ -177,29 +177,18 @@ public:
 
 	virtual void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, void* pContext = NULL);
 	virtual void AnimateObjects(float fTimeElapsed, CCamera* pCamera);
-	virtual void ReleaseObjects();
-
-	virtual void CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
-	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
-	virtual void ReleaseShaderVariables();
-
 	virtual D3D12_BLEND_DESC CreateBlendState();
 	virtual D3D12_SHADER_BYTECODE CreatePixelShader(ID3DBlob** ppd3dShaderBlob);
+};
 
-	virtual void CreateShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature);
 
-	virtual void ReleaseUploadBuffers();
+class CTreeShader : public CBillboardShader
+{
+public:
+	CTreeShader();
+	virtual ~CTreeShader();
 
-	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
+	virtual void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, void* pContext = NULL);
 
-protected:
-	CBillboardObject** m_ppObjects = 0;
-	int								m_nObjects = 0;
-
-	ID3D12Resource* m_pd3dcbGameObjects = NULL;
-	CB_GAMEOBJECT_INFO* m_pcbMappedGameObjects = NULL;
-
-#ifdef _WITH_BATCH_MATERIAL
-	CMaterial* m_pMaterial = NULL;
-#endif
+	virtual D3D12_SHADER_BYTECODE CreatePixelShader(ID3DBlob** ppd3dShaderBlob);
 };

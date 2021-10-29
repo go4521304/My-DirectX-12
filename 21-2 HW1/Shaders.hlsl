@@ -210,6 +210,5 @@ Texture2D gtxtTreeTexture : register(t9);
 float4 PSBillTree(VS_TEXTURED_OUTPUT input) : SV_TARGET
 {
 	float4 cColor = gtxtTreeTexture.Sample(gWrapSamplerState, input.uv);
-	//if (cColor.a <= 0.3f) discard;
 	return(cColor);
 }
