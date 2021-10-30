@@ -205,10 +205,11 @@ float4 PSSkyBox(VS_TEXTURED_OUTPUT input) : SV_TARGET
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-Texture2D gtxtTreeTexture : register(t9);
+Texture2D gtxtBillboardTexture[2] : register(t9);
 
-float4 PSBillTree(VS_TEXTURED_OUTPUT input) : SV_TARGET
+float4 PSBillboard(VS_TEXTURED_OUTPUT input) : SV_TARGET
 {
-	float4 cColor = gtxtTreeTexture.Sample(gWrapSamplerState, input.uv);
+	float4 cColor = gtxtBillboardTexture[0].Sample(gWrapSamplerState, input.uv);
+	clip(cColor.a - 0.15f);
 	return(cColor);
 }

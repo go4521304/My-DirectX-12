@@ -37,7 +37,7 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	pObjectShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pTerrain);
 	m_ppShaders[0] = pObjectShader;
 
-	// 나무
+	// 빌보드
 	CBillboardShader* pBillShader = new CBillboardShader();
 	pBillShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature);
 	pBillShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pTerrain);
@@ -107,10 +107,10 @@ ID3D12RootSignature *CScene::CreateGraphicsRootSignature(ID3D12Device *pd3dDevic
 	pd3dDescriptorRanges[4].RegisterSpace = 0;
 	pd3dDescriptorRanges[4].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
-	// 빌보드 텍스쳐 (나무)
+	// 빌보드 텍스쳐 (나무 / 풀)
 	pd3dDescriptorRanges[5].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
-	pd3dDescriptorRanges[5].NumDescriptors = 1;
-	pd3dDescriptorRanges[5].BaseShaderRegister = 9; //t9: gtxtTreeTexture
+	pd3dDescriptorRanges[5].NumDescriptors = 2;
+	pd3dDescriptorRanges[5].BaseShaderRegister = 9; //t9: gtxtBillboardTexture
 	pd3dDescriptorRanges[5].RegisterSpace = 0;
 	pd3dDescriptorRanges[5].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 

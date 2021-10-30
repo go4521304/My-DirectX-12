@@ -264,6 +264,7 @@ class CBillboardObject : public CGameObject
 {
 private:
 	XMFLOAT3					m_xmf3RotationAxis;
+	//UINT						m_billType;	// 0 tree / 1 grassPink
 public:
 	void SetRotationAxis(XMFLOAT3 xmf3RotationAxis) { m_xmf3RotationAxis = xmf3RotationAxis; }
 	virtual void Animate(float fTimeElapsed, CCamera* pCamera);

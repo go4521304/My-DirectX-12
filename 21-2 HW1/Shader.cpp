@@ -595,8 +595,8 @@ void CBillboardShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	float fyPitch = 12.0f * 3.5f;
 	float fzPitch = 12.0f * 3.5f;
 
-	float fxSize = 5.0f;
-	float fySize = 10.0f;
+	float fxSize = 10.0f;
+	float fySize = 30.0f;
 
 	float fTerrainWidth = pTerrain->GetWidth();
 	float fTerrainLength = pTerrain->GetLength();
@@ -606,12 +606,13 @@ void CBillboardShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	int zObjects = int(fTerrainLength / fzPitch);
 	m_nObjects = (xObjects * yObjects * zObjects);
 	
-	CTexture* pTexture = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	CTexture* pTexture = new CTexture(2, RESOURCE_TEXTURE2D_ARRAY, 0, 1);
 	pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Image/tree.dds", RESOURCE_TEXTURE2D, 0);
+	pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Image/grassPink.dds", RESOURCE_TEXTURE2D, 1);
 
 	UINT ncbElementBytes = ((sizeof(CB_GAMEOBJECT_INFO) + 255) & ~255);
 
-	CreateCbvSrvDescriptorHeaps(pd3dDevice, m_nObjects, 1);
+	CreateCbvSrvDescriptorHeaps(pd3dDevice, m_nObjects, 2);
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 	CreateConstantBufferViews(pd3dDevice, m_nObjects, m_pd3dcbGameObjects, ncbElementBytes);
 	CreateShaderResourceViews(pd3dDevice, pTexture, 0, 7);
@@ -677,7 +678,7 @@ void CBillboardShader::AnimateObjects(float fTimeElapsed, CCamera* pCamera)
 
 D3D12_SHADER_BYTECODE CBillboardShader::CreatePixelShader(ID3DBlob** ppd3dShaderBlob)
 {
-	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "PSBillTree", "ps_5_1", ppd3dShaderBlob));
+	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "PSBillboard", "ps_5_1", ppd3dShaderBlob));
 }
 
 D3D12_BLEND_DESC CBillboardShader::CreateBlendState()
