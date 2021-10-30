@@ -602,7 +602,7 @@ void CBillboardShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	float fTerrainLength = pTerrain->GetLength();
 
 	int xObjects = int(fTerrainWidth / fxPitch);
-	int yObjects = 1;
+	int yObjects = 2;
 	int zObjects = int(fTerrainLength / fzPitch);
 	m_nObjects = (xObjects * yObjects * zObjects);
 	
@@ -638,6 +638,8 @@ void CBillboardShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 			for (int y = 0; y < yObjects; y++)
 			{
 				pBillboardObject = new CBillboardObject;
+				pBillboardObject->SetTextureType(y);
+
 				pBillboardObject->SetMesh(0, pRectMesh);
 #ifndef _WITH_BATCH_MATERIAL
 				pBillboardObject->SetMaterial(pRectMaterial);
@@ -651,7 +653,7 @@ void CBillboardShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 				float fHeight = pTerrain->GetHeight(xPosition, zPosition);
 
 				pBillboardObject->SetPosition(xPosition, fHeight + (y * 3.0f * fyPitch) + (fySize / 2), zPosition);
-				if (y == 0)
+				if (y == 0 && pBillboardObject->GetTextureType() == 1)
 				{
 					xmf3SurfaceNormal = pTerrain->GetNormal(xPosition, zPosition);
 					xmf3RotateAxis = Vector3::CrossProduct(XMFLOAT3(0.0f, 1.0f, 0.0f), xmf3SurfaceNormal);
@@ -665,7 +667,6 @@ void CBillboardShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 			}
 		}
 	}
-	
 }
 
 void CBillboardShader::AnimateObjects(float fTimeElapsed, CCamera* pCamera)
@@ -699,4 +700,28 @@ D3D12_BLEND_DESC CBillboardShader::CreateBlendState()
 	d3dBlendDesc.RenderTarget[0].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
 
 	return(d3dBlendDesc);
+}
+
+void CBillboardShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
+{
+	CTexturedShader::Render(pd3dCommandList, pCamera);
+
+#ifdef _WITH_BATCH_MATERIAL
+	if (m_pMaterial) m_pMaterial->UpdateShaderVariables(pd3dCommandList);
+#endif
+
+	UINT textureType = 0;
+
+	for (int j = 0; j < m_nObjects; j++)
+	{
+		if (m_ppObjects[j])
+		{
+			/*if (textureType != m_ppObjects[j]->GetTextureType())
+			{
+				textureType = m_ppObjects[j]->GetTextureType();
+				pd3dCommandList->SetGraphicsRoot32BitConstant(8, textureType, 0);
+			}*/
+			m_ppObjects[j]->Render(pd3dCommandList, pCamera);
+		}
+	}
 }

@@ -16,10 +16,16 @@ struct CB_CAMERA_INFO
 	matrix		mtxView;
 	matrix		mtxProjection;
 };
+struct CB_BILLBOARD_INDEX
+{
+	uint		type;
+};
 
 ConstantBuffer<CB_PLAYER_INFO> gcbPlayerObjectInfo : register(b0);
 ConstantBuffer<CB_CAMERA_INFO> gcbCameraInfo : register(b1);
 ConstantBuffer<CB_GAMEOBJECT_INFO> gcbGameObjectInfo : register(b2);
+ConstantBuffer< CB_BILLBOARD_INDEX> gcbTextureType : register(b3);
+
 #else
 cbuffer cbPlayerInfo : register(b0)
 {
@@ -35,6 +41,10 @@ cbuffer cbCameraInfo : register(b1)
 cbuffer cbGameObjectInfo : register(b2)
 {
 	matrix		gmtxWorld : packoffset(c0);
+};
+cbuffer cbTextureType : register(b3)
+{
+	uint		billType : packoffset(c0);
 };
 #endif
 
@@ -209,7 +219,12 @@ Texture2D gtxtBillboardTexture[2] : register(t9);
 
 float4 PSBillboard(VS_TEXTURED_OUTPUT input) : SV_TARGET
 {
-	float4 cColor = gtxtBillboardTexture[0].Sample(gWrapSamplerState, input.uv);
+	float4 cColor;
+#ifdef _WITH_CONSTANT_BUFFER_SYNTAX
+	cColor = gtxtBillboardTexture[gcbTextureType.type].Sample(gWrapSamplerState, input.uv);
+#else
+	cColor = gtxtBillboardTexture[billType].Sample(gWrapSamplerState, input.uv);
+#endif
 	clip(cColor.a - 0.15f);
 	return(cColor);
 }

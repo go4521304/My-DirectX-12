@@ -183,6 +183,10 @@ public:
 
 	void Rotate(float fPitch = 10.0f, float fYaw = 10.0f, float fRoll = 10.0f);
 	void Rotate(XMFLOAT3 *pxmf3Axis, float fAngle);
+
+
+	virtual void SetTextureType(UINT type) {}
+	virtual UINT GetTextureType() { return 0; }
 };
 
 class CRotatingObject : public CGameObject
@@ -264,11 +268,14 @@ class CBillboardObject : public CGameObject
 {
 private:
 	XMFLOAT3					m_xmf3RotationAxis;
-	//UINT						m_billType;	// 0 tree / 1 grassPink
+	UINT						m_textureType = 0;	// 0 tree / 1 grassPink
 public:
 	void SetRotationAxis(XMFLOAT3 xmf3RotationAxis) { m_xmf3RotationAxis = xmf3RotationAxis; }
 	virtual void Animate(float fTimeElapsed, CCamera* pCamera);
 	virtual void SetLookAt(XMFLOAT3& xmf3Target);
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
 
+
+	virtual void SetTextureType(UINT type) { m_textureType = type; }
+	virtual UINT GetTextureType() { return m_textureType; }
 };

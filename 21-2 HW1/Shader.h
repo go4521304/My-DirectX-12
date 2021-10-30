@@ -179,16 +179,5 @@ public:
 	virtual void AnimateObjects(float fTimeElapsed, CCamera* pCamera);
 	virtual D3D12_BLEND_DESC CreateBlendState();
 	virtual D3D12_SHADER_BYTECODE CreatePixelShader(ID3DBlob** ppd3dShaderBlob);
-};
-
-
-class CTreeShader : public CBillboardShader
-{
-public:
-	CTreeShader();
-	virtual ~CTreeShader();
-
-	virtual void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, void* pContext = NULL);
-
-	virtual D3D12_SHADER_BYTECODE CreatePixelShader(ID3DBlob** ppd3dShaderBlob);
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
 };

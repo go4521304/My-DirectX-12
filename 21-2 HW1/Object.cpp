@@ -632,6 +632,9 @@ void CBillboardObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamer
 {
 	OnPrepareRender();
 
+	pd3dCommandList->SetGraphicsRoot32BitConstant(8, 0, 0);
+	pd3dCommandList->SetGraphicsRootDescriptorTable(3, m_d3dCbvGPUDescriptorHandle);
+
 	if (m_pMaterial)
 	{
 		if (m_pMaterial->m_pShader)
@@ -642,6 +645,7 @@ void CBillboardObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamer
 			UpdateShaderVariables(pd3dCommandList);
 		}
 	}
+
 
 	pd3dCommandList->SetGraphicsRootDescriptorTable(2, m_d3dCbvGPUDescriptorHandle);
 
