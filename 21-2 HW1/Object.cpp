@@ -627,37 +627,3 @@ void CBillboardObject::SetLookAt(XMFLOAT3& xmf3Target)
 	m_xmf4x4World._21 = xmf3Up.x; m_xmf4x4World._22 = xmf3Up.y; m_xmf4x4World._23 = xmf3Up.z;
 	m_xmf4x4World._31 = xmf3Look.x; m_xmf4x4World._32 = xmf3Look.y; m_xmf4x4World._33 = xmf3Look.z;
 }
-
-void CBillboardObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
-{
-	OnPrepareRender();
-
-	pd3dCommandList->SetGraphicsRoot32BitConstant(8, 0, 0);
-	pd3dCommandList->SetGraphicsRootDescriptorTable(3, m_d3dCbvGPUDescriptorHandle);
-
-	if (m_pMaterial)
-	{
-		if (m_pMaterial->m_pShader)
-		{
-			m_pMaterial->m_pShader->Render(pd3dCommandList, pCamera);
-			m_pMaterial->m_pShader->UpdateShaderVariables(pd3dCommandList);
-
-			UpdateShaderVariables(pd3dCommandList);
-		}
-	}
-
-
-	pd3dCommandList->SetGraphicsRootDescriptorTable(2, m_d3dCbvGPUDescriptorHandle);
-
-	if (m_ppMeshes)
-	{
-		for (int i = 0; i < m_nMeshes; i++)
-		{
-			if (m_pMaterial)
-			{
-				if (m_pMaterial->m_pTexture) m_pMaterial->m_pTexture->UpdateShaderVariable(pd3dCommandList, 0, i);
-			}
-			if (m_ppMeshes[i]) m_ppMeshes[i]->Render(pd3dCommandList);
-		}
-	}
-}

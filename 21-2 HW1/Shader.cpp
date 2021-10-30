@@ -716,6 +716,7 @@ void CBillboardShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamer
 	{
 		if (m_ppObjects[j])
 		{
+			// 문제의 그 부분...
 			/*if (textureType != m_ppObjects[j]->GetTextureType())
 			{
 				textureType = m_ppObjects[j]->GetTextureType();

@@ -273,8 +273,6 @@ public:
 	void SetRotationAxis(XMFLOAT3 xmf3RotationAxis) { m_xmf3RotationAxis = xmf3RotationAxis; }
 	virtual void Animate(float fTimeElapsed, CCamera* pCamera);
 	virtual void SetLookAt(XMFLOAT3& xmf3Target);
-	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
-
 
 	virtual void SetTextureType(UINT type) { m_textureType = type; }
 	virtual UINT GetTextureType() { return m_textureType; }
