@@ -157,7 +157,8 @@ ID3D12RootSignature *CScene::CreateGraphicsRootSignature(ID3D12Device *pd3dDevic
 	pd3dRootParameters[7].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 
 	// 텍스처 선택 인덱스
-	pd3dRootParameters[8].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+	pd3dRootParameters[8].ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
+	pd3dRootParameters[8].Constants.Num32BitValues = 1;
 	pd3dRootParameters[8].Descriptor.ShaderRegister = 3; //Billboard Texture index
 	pd3dRootParameters[8].Descriptor.RegisterSpace = 0;
 	pd3dRootParameters[8].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
