@@ -1,4 +1,4 @@
-//#define _WITH_CONSTANT_BUFFER_SYNTAX
+#define _WITH_CONSTANT_BUFFER_SYNTAX
 
 #ifdef _WITH_CONSTANT_BUFFER_SYNTAX
 struct CB_PLAYER_INFO
@@ -252,7 +252,7 @@ void GS_Billboard(point VS_OUT input[1], uint primID : SV_PrimitiveID, inout Tri
 	float3 vLook;
 	//matrix gmtxViewProjection;
 #ifdef _WITH_CONSTANT_BUFFER_SYNTAX
-	vLook = gcbCameraInfo.Position.xyz - input[0].centerW;
+	vLook = gcbCameraInfo.position.xyz - input[0].centerW;
 	//gmtxViewProjection = gcbCameraInfo.mtxView * gcbCameraInfo.mtxProjection;
 #else
 	vLook = gvCameraPosition.xyz - input[0].centerW;
@@ -263,10 +263,10 @@ void GS_Billboard(point VS_OUT input[1], uint primID : SV_PrimitiveID, inout Tri
 	float fHalfW = input[0].sizeW.x * 0.5f;
 	float fHalfH = input[0].sizeW.y * 0.5f;
 	float4 pVertices[4];
-	pVertices[0] = flaot4(input[0].centerW + fHalfW * vRight - fHalf * vUp, 1.0f);
-	pVertices[1] = flaot4(input[0].centerW + fHalfW * vRight + fHalfH * vUp, 1.0f);
-	pVertices[2] = flaot4(input[0].centerW - fHalfW * vRight - fHalfH * vUp, 1.0f);
-	pVertices[3] = flaot4(input[0].centerW - fHalfW * vRight + fHalf * vUp, 1.0f);
+	pVertices[0] = float4(input[0].centerW + fHalfW * vRight - fHalfH * vUp, 1.0f);
+	pVertices[1] = float4(input[0].centerW + fHalfW * vRight + fHalfH * vUp, 1.0f);
+	pVertices[2] = float4(input[0].centerW - fHalfW * vRight - fHalfH * vUp, 1.0f);
+	pVertices[3] = float4(input[0].centerW - fHalfW * vRight + fHalfH * vUp, 1.0f);
 	float2 pUVs[4] = { float2(0.0f, 1.0f), float2(0.0f, 0.0f), float2(1.0f, 1.0f), float2(1.0f, 0.0f) };
 	GS_OUT output;
 	for (int i = 0; i < 4; ++i)
@@ -278,18 +278,18 @@ void GS_Billboard(point VS_OUT input[1], uint primID : SV_PrimitiveID, inout Tri
 		output.posH = mul(mul(pVertices[i], gmtxView), gmtxProjection);
 #endif
 		output.normalW = vLook;
-		output.uv = pUV[i];
+		output.uv = pUVs[i];
 		output.primID = primID;
 		outStream.Append(output);
 	}
 }
 
-float4 PS_Billboard(VS_TEXTURED_OUTPUT input) : SV_TARGET
+float4 PS_Billboard(GS_OUT input) : SV_TARGET
 {
-	float3 uvw = float3(input.uv, (input.primID % 4));
 	float4 cColor;
+	float3 uvw = float3(input.uv, (input.primID % 4));
 #ifdef _WITH_CONSTANT_BUFFER_SYNTAX
-	cColor = gtxtBillboardTexture[gcbTextureType.type].Sample(gWrapSamplerState, uvw;
+	cColor = gtxtBillboardTexture[gcbTextureType.type].Sample(gWrapSamplerState, uvw);
 #else
 	cColor = gtxtBillboardTexture[billType].Sample(gWrapSamplerState, uvw);
 #endif
