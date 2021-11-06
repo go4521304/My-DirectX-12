@@ -196,3 +196,21 @@ public:
 	CTexturedRectMesh(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, float fWidth=20.0f, float fHeight=20.0f, float fDepth=20.0f, float fxPosition=0.0f, float fyPosition=0.0f, float fzPosition=0.0f);
 	virtual ~CTexturedRectMesh();
 };
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+class CBillboardVertex : public CVertex
+{
+public:
+	//XMFLOAT3 m_xmfUp;
+	XMFLOAT2 m_xmfSize;
+	CBillboardVertex() {}
+	CBillboardVertex(XMFLOAT3 xmf3Position, XMFLOAT2 xmf2Size) { m_xmf3Position = xmf3Position; m_xmfSize = xmf2Size; }
+	~CBillboardVertex() {}
+};
+
+class CBillboardMesh : public CMesh
+{
+public:
+	CBillboardMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, void* pContext, UINT nNum, float fWidth = 2.0f, float fHeight = 2.0f);
+	virtual ~CBillboardMesh();
+};

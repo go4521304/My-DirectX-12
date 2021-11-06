@@ -4,6 +4,7 @@
 
 #include "stdafx.h"
 #include "Mesh.h"
+#include "Object.h"
 
 CMesh::CMesh(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList)
 {
@@ -581,5 +582,40 @@ CTexturedRectMesh::CTexturedRectMesh(ID3D12Device *pd3dDevice, ID3D12GraphicsCom
 }
 
 CTexturedRectMesh::~CTexturedRectMesh()
+{
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+CBillboardMesh::CBillboardMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, void* pContext, UINT nNum, float fWidth, float fHeight) : CMesh(pd3dDevice, pd3dCommandList)
+{
+	CHeightMapTerrain* pTerrain = (CHeightMapTerrain*)pContext;
+
+	m_nStride = sizeof(CBillboardVertex);
+	m_nVertices = nNum;
+	XMFLOAT3 xmf3Position;
+	XMFLOAT2 xmf2Size = {fWidth, fHeight};
+	CBillboardVertex* pBillboardVertices = new CBillboardVertex[nNum];
+
+	int fTerrainWidth = pTerrain->GetWidth();
+	int fTerrainLength = pTerrain->GetLength();
+
+	for (int i = 0; i < nNum; ++i)
+	{
+		float fxTerrain = xmf3Position.x = rand() % fTerrainWidth;
+		float fyTerrain = xmf3Position.y = rand() % fTerrainLength;
+		xmf3Position.y = pTerrain->GetHeight(fxTerrain, fyTerrain, false) + (fHeight / 2);
+		pBillboardVertices[i] = CBillboardVertex(xmf3Position, xmf2Size);
+	}
+
+	m_pd3dVertexBuffer = CreateBufferResource(pd3dDevice, pd3dCommandList, pBillboardVertices, m_nStride * m_nVertices,
+		D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dVertexUploadBuffer);
+
+	m_d3dVertexBufferView.BufferLocation = m_pd3dVertexBuffer->GetGPUVirtualAddress();
+	m_d3dVertexBufferView.StrideInBytes = m_nStride;
+	m_d3dVertexBufferView.SizeInBytes = m_nStride * m_nVertices;
+}
+
+CBillboardMesh::~CBillboardMesh()
 {
 }

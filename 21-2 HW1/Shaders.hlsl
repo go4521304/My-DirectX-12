@@ -1,10 +1,10 @@
-#define _WITH_CONSTANT_BUFFER_SYNTAX
+//#define _WITH_CONSTANT_BUFFER_SYNTAX
 
 #ifdef _WITH_CONSTANT_BUFFER_SYNTAX
 struct CB_PLAYER_INFO
 {
 	matrix		mtxWorld;
-}; 
+};
 
 struct CB_GAMEOBJECT_INFO
 {
@@ -15,6 +15,7 @@ struct CB_CAMERA_INFO
 {
 	matrix		mtxView;
 	matrix		mtxProjection;
+	float3		position;
 };
 struct CB_BILLBOARD_INDEX
 {
@@ -36,6 +37,7 @@ cbuffer cbCameraInfo : register(b1)
 {
 	matrix		gmtxView : packoffset(c0);
 	matrix		gmtxProjection : packoffset(c4);
+	float3		gvCameraPosition : packoffset(c8);
 };
 
 cbuffer cbGameObjectInfo : register(b2)
@@ -137,24 +139,24 @@ VS_TEXTURED_OUTPUT VSTextured(VS_TEXTURED_INPUT input)
 
 float4 PSTextured(VS_TEXTURED_OUTPUT input, uint nPrimitiveID : SV_PrimitiveID) : SV_TARGET
 {
-/*
-	float4 cColor;
-	if (nPrimitiveID < 2)
-		cColor = gtxtTextures[0].Sample(gWrapSamplerState, input.uv);
-	else if (nPrimitiveID < 4)
-		cColor = gtxtTextures[1].Sample(gWrapSamplerState, input.uv);
-	else if (nPrimitiveID < 6)
-		cColor = gtxtTextures[2].Sample(gWrapSamplerState, input.uv);
-	else if (nPrimitiveID < 8)
-		cColor = gtxtTextures[3].Sample(gWrapSamplerState, input.uv);
-	else if (nPrimitiveID < 10)
-		cColor = gtxtTextures[4].Sample(gWrapSamplerState, input.uv);
-	else
-		cColor = gtxtTextures[5].Sample(gWrapSamplerState, input.uv);
-*/
-	float4 cColor = gtxtTextures[NonUniformResourceIndex(nPrimitiveID/2)].Sample(gWrapSamplerState, input.uv);
+	/*
+		float4 cColor;
+		if (nPrimitiveID < 2)
+			cColor = gtxtTextures[0].Sample(gWrapSamplerState, input.uv);
+		else if (nPrimitiveID < 4)
+			cColor = gtxtTextures[1].Sample(gWrapSamplerState, input.uv);
+		else if (nPrimitiveID < 6)
+			cColor = gtxtTextures[2].Sample(gWrapSamplerState, input.uv);
+		else if (nPrimitiveID < 8)
+			cColor = gtxtTextures[3].Sample(gWrapSamplerState, input.uv);
+		else if (nPrimitiveID < 10)
+			cColor = gtxtTextures[4].Sample(gWrapSamplerState, input.uv);
+		else
+			cColor = gtxtTextures[5].Sample(gWrapSamplerState, input.uv);
+	*/
+		float4 cColor = gtxtTextures[NonUniformResourceIndex(nPrimitiveID / 2)].Sample(gWrapSamplerState, input.uv);
 
-	return(cColor);
+		return(cColor);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -217,13 +219,79 @@ float4 PSSkyBox(VS_TEXTURED_OUTPUT input) : SV_TARGET
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 Texture2D gtxtBillboardTexture[2] : register(t9);
 
-float4 PSBillboard(VS_TEXTURED_OUTPUT input) : SV_TARGET
+struct VS_IN {
+	float3 posW : POSITION;
+	float2 sizeW : SIZE;
+};
+
+struct VS_OUT {
+	float3 centerW : POSITION;
+	float2 sizeW : SIZE;
+};
+
+struct GS_OUT {
+	float4 posH : SV_POSITION;
+	float3 posW : POSITION;
+	float3 normalW : NORMAL;
+	float2 uv : TEXCOORD;
+	uint primID : SV_PrimitiveID;
+};
+
+VS_OUT VS_Billboard(VS_IN input)
 {
+	VS_OUT output;
+	output.centerW = input.posW;
+	output.sizeW = input.sizeW;
+	return output;
+}
+
+[maxvertexcount(4)]
+void GS_Billboard(point VS_OUT input[1], uint primID : SV_PrimitiveID, inout TriangleStream<GS_OUT> outStream)
+{
+	float3 vUp = float3(0.0f, 1.0f, 0.0f);
+	float3 vLook;
+	//matrix gmtxViewProjection;
+#ifdef _WITH_CONSTANT_BUFFER_SYNTAX
+	vLook = gcbCameraInfo.Position.xyz - input[0].centerW;
+	//gmtxViewProjection = gcbCameraInfo.mtxView * gcbCameraInfo.mtxProjection;
+#else
+	vLook = gvCameraPosition.xyz - input[0].centerW;
+	//gmtxViewProjection = gmtxView * gmtxProjection;
+#endif
+	vLook = normalize(vLook);
+	float3 vRight = cross(vUp, vLook);
+	float fHalfW = input[0].sizeW.x * 0.5f;
+	float fHalfH = input[0].sizeW.y * 0.5f;
+	float4 pVertices[4];
+	pVertices[0] = flaot4(input[0].centerW + fHalfW * vRight - fHalf * vUp, 1.0f);
+	pVertices[1] = flaot4(input[0].centerW + fHalfW * vRight + fHalfH * vUp, 1.0f);
+	pVertices[2] = flaot4(input[0].centerW - fHalfW * vRight - fHalfH * vUp, 1.0f);
+	pVertices[3] = flaot4(input[0].centerW - fHalfW * vRight + fHalf * vUp, 1.0f);
+	float2 pUVs[4] = { float2(0.0f, 1.0f), float2(0.0f, 0.0f), float2(1.0f, 1.0f), float2(1.0f, 0.0f) };
+	GS_OUT output;
+	for (int i = 0; i < 4; ++i)
+	{
+		output.posW = pVertices[i].xyz;
+#ifdef _WITH_CONSTANT_BUFFER_SYNTAX
+		output.posH = mul(mul(pVertices[i], gcbCameraInfo.mtxView), gcbCameraInfo.mtxProjection);
+#else
+		output.posH = mul(mul(pVertices[i], gmtxView), gmtxProjection);
+#endif
+		output.normalW = vLook;
+		output.uv = pUV[i];
+		output.primID = primID;
+		outStream.Append(output);
+	}
+}
+
+float4 PS_Billboard(VS_TEXTURED_OUTPUT input) : SV_TARGET
+{
+	float3 uvw = float3(input.uv, (input.primID % 4));
 	float4 cColor;
 #ifdef _WITH_CONSTANT_BUFFER_SYNTAX
-	cColor = gtxtBillboardTexture[gcbTextureType.type].Sample(gWrapSamplerState, input.uv);
+	cColor = gtxtBillboardTexture[gcbTextureType.type].Sample(gWrapSamplerState, uvw;
 #else
-	cColor = gtxtBillboardTexture[billType].Sample(gWrapSamplerState, input.uv);
+	cColor = gtxtBillboardTexture[billType].Sample(gWrapSamplerState, uvw);
 #endif
 	clip(cColor.a - 0.15f);
 	return(cColor);

@@ -39,6 +39,15 @@ D3D12_SHADER_BYTECODE CShader::CreatePixelShader(ID3DBlob **ppd3dShaderBlob)
 	return(d3dShaderByteCode);
 }
 
+D3D12_SHADER_BYTECODE CShader::CreateGeometryShader(ID3DBlob** ppd3dShaderBlob)
+{
+	D3D12_SHADER_BYTECODE d3dShaderByteCode;
+	d3dShaderByteCode.BytecodeLength = 0;
+	d3dShaderByteCode.pShaderBytecode = NULL;
+
+	return(d3dShaderByteCode);
+}
+
 D3D12_SHADER_BYTECODE CShader::CompileShaderFromFile(WCHAR *pszFileName, LPCSTR pszShaderName, LPCSTR pszShaderProfile, ID3DBlob **ppd3dShaderBlob)
 {
 	UINT nCompileFlags = 0;
@@ -127,13 +136,14 @@ D3D12_BLEND_DESC CShader::CreateBlendState()
 
 void CShader::CreateShader(ID3D12Device *pd3dDevice, ID3D12RootSignature *pd3dGraphicsRootSignature)
 {
-	ID3DBlob *pd3dVertexShaderBlob = NULL, *pd3dPixelShaderBlob = NULL;
+	ID3DBlob *pd3dVertexShaderBlob = NULL, *pd3dPixelShaderBlob = NULL, * pd3dGeometryShaderBlob = NULL;
 
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC d3dPipelineStateDesc;
 	::ZeroMemory(&d3dPipelineStateDesc, sizeof(D3D12_GRAPHICS_PIPELINE_STATE_DESC));
 	d3dPipelineStateDesc.pRootSignature = pd3dGraphicsRootSignature;
 	d3dPipelineStateDesc.VS = CreateVertexShader(&pd3dVertexShaderBlob);
 	d3dPipelineStateDesc.PS = CreatePixelShader(&pd3dPixelShaderBlob);
+	d3dPipelineStateDesc.GS = CreateGeometryShader(&pd3dGeometryShaderBlob);
 	d3dPipelineStateDesc.RasterizerState = CreateRasterizerState();
 	d3dPipelineStateDesc.BlendState = CreateBlendState();
 	d3dPipelineStateDesc.DepthStencilState = CreateDepthStencilState();
@@ -677,9 +687,19 @@ void CBillboardShader::AnimateObjects(float fTimeElapsed, CCamera* pCamera)
 	}
 }
 
+D3D12_SHADER_BYTECODE CBillboardShader::CreateVertexShader(ID3DBlob** ppd3dShaderBlob)
+{
+	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "VS_Billboard", "vs_5_1", ppd3dShaderBlob));
+}
+
 D3D12_SHADER_BYTECODE CBillboardShader::CreatePixelShader(ID3DBlob** ppd3dShaderBlob)
 {
-	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "PSBillboard", "ps_5_1", ppd3dShaderBlob));
+	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "PS_Billboard", "ps_5_1", ppd3dShaderBlob));
+}
+
+D3D12_SHADER_BYTECODE CBillboardShader::CreateGeometryShader(ID3DBlob** ppd3dShaderBlob)
+{
+	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "GS_Billboard", "vs_5_1", ppd3dShaderBlob));
 }
 
 D3D12_BLEND_DESC CBillboardShader::CreateBlendState()
@@ -724,4 +744,19 @@ void CBillboardShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamer
 			m_ppObjects[j]->Render(pd3dCommandList, pCamera);
 		}
 	}
+}
+
+D3D12_INPUT_LAYOUT_DESC CBillboardShader::CreateInputLayout()
+{
+	UINT nInputElementDescs = 2;
+	D3D12_INPUT_ELEMENT_DESC* pd3dInputElementDescs = new D3D12_INPUT_ELEMENT_DESC[nInputElementDescs];
+
+	pd3dInputElementDescs[0] = { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+	pd3dInputElementDescs[1] = { "SIZE", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+
+	D3D12_INPUT_LAYOUT_DESC d3dInputLayoutDesc;
+	d3dInputLayoutDesc.pInputElementDescs = pd3dInputElementDescs;
+	d3dInputLayoutDesc.NumElements = nInputElementDescs;
+
+	return(d3dInputLayoutDesc);
 }
