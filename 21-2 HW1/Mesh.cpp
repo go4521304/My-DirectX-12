@@ -504,6 +504,8 @@ CTexturedRectMesh::CTexturedRectMesh(ID3D12Device *pd3dDevice, ID3D12GraphicsCom
 {
 	m_nVertices = 6;
 	m_nStride = sizeof(CTexturedVertex);
+	m_nOffset = 0;
+	m_nSlot = 0;
 	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 
 	CTexturedVertex pVertices[6];
@@ -590,6 +592,7 @@ CTexturedRectMesh::~CTexturedRectMesh()
 CBillboardMesh::CBillboardMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, void* pContext, UINT nNum, float fWidth, float fHeight) : CMesh(pd3dDevice, pd3dCommandList)
 {
 	CHeightMapTerrain* pTerrain = (CHeightMapTerrain*)pContext;
+	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_POINTLIST;
 
 	m_nStride = sizeof(CBillboardVertex);
 	m_nVertices = nNum;
@@ -619,3 +622,9 @@ CBillboardMesh::CBillboardMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 CBillboardMesh::~CBillboardMesh()
 {
 }
+
+void CBillboardMesh::ReleaseUploadBuffers()
+{
+	if (m_pd3dVertexUploadBuffer) m_pd3dVertexUploadBuffer->Release();
+	m_pd3dVertexUploadBuffer = NULL;
+};

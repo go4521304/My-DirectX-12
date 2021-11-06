@@ -250,13 +250,10 @@ void GS_Billboard(point VS_OUT input[1], uint primID : SV_PrimitiveID, inout Tri
 {
 	float3 vUp = float3(0.0f, 1.0f, 0.0f);
 	float3 vLook;
-	//matrix gmtxViewProjection;
 #ifdef _WITH_CONSTANT_BUFFER_SYNTAX
 	vLook = gcbCameraInfo.position.xyz - input[0].centerW;
-	//gmtxViewProjection = gcbCameraInfo.mtxView * gcbCameraInfo.mtxProjection;
 #else
 	vLook = gvCameraPosition.xyz - input[0].centerW;
-	//gmtxViewProjection = gmtxView * gmtxProjection;
 #endif
 	vLook = normalize(vLook);
 	float3 vRight = cross(vUp, vLook);
@@ -282,6 +279,7 @@ void GS_Billboard(point VS_OUT input[1], uint primID : SV_PrimitiveID, inout Tri
 		output.primID = primID;
 		outStream.Append(output);
 	}
+	outStream.RestartStrip();
 }
 
 float4 PS_Billboard(GS_OUT input) : SV_TARGET
@@ -289,9 +287,9 @@ float4 PS_Billboard(GS_OUT input) : SV_TARGET
 	float4 cColor;
 	float3 uvw = float3(input.uv, (input.primID % 4));
 #ifdef _WITH_CONSTANT_BUFFER_SYNTAX
-	cColor = gtxtBillboardTexture[gcbTextureType.type].Sample(gWrapSamplerState, uvw);
+	cColor = gtxtBillboardTexture[gcbTextureType.type].Sample(gWrapSamplerState, input.uv);
 #else
-	cColor = gtxtBillboardTexture[billType].Sample(gWrapSamplerState, uvw);
+	cColor = gtxtBillboardTexture[billType].Sample(gWrapSamplerState, input.uv);
 #endif
 	clip(cColor.a - 0.15f);
 	return(cColor);

@@ -138,6 +138,10 @@ D3D12_BLEND_DESC CShader::CreateBlendState()
 
 	return(d3dBlendDesc);
 }
+D3D12_PRIMITIVE_TOPOLOGY_TYPE CShader::GetPrimitiveTopologyType()
+{
+	return D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+}
 
 void CShader::CreateShader(ID3D12Device *pd3dDevice, ID3D12RootSignature *pd3dGraphicsRootSignature)
 {
@@ -154,7 +158,7 @@ void CShader::CreateShader(ID3D12Device *pd3dDevice, ID3D12RootSignature *pd3dGr
 	d3dPipelineStateDesc.DepthStencilState = CreateDepthStencilState();
 	d3dPipelineStateDesc.InputLayout = CreateInputLayout();
 	d3dPipelineStateDesc.SampleMask = UINT_MAX;
-	d3dPipelineStateDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+	d3dPipelineStateDesc.PrimitiveTopologyType = GetPrimitiveTopologyType();
 	d3dPipelineStateDesc.NumRenderTargets = 1;
 	d3dPipelineStateDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;
 	d3dPipelineStateDesc.DSVFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
@@ -164,6 +168,7 @@ void CShader::CreateShader(ID3D12Device *pd3dDevice, ID3D12RootSignature *pd3dGr
 
 	if (pd3dVertexShaderBlob) pd3dVertexShaderBlob->Release();
 	if (pd3dPixelShaderBlob) pd3dPixelShaderBlob->Release();
+	if (pd3dGeometryShaderBlob) pd3dGeometryShaderBlob->Release();
 
 	if (d3dPipelineStateDesc.InputLayout.pInputElementDescs) delete[] d3dPipelineStateDesc.InputLayout.pInputElementDescs;
 }
@@ -619,7 +624,8 @@ void CBillboardShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	int xObjects = int(fTerrainWidth / fxPitch);
 	int yObjects = 2;
 	int zObjects = int(fTerrainLength / fzPitch);
-	m_nObjects = (xObjects * yObjects * zObjects);
+	//m_nObjects = (xObjects * yObjects * zObjects);
+	m_nObjects = 2;
 	
 	CTexture* pTexture = new CTexture(2, RESOURCE_TEXTURE2D_ARRAY, 0, 1);
 	pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Image/tree.dds", RESOURCE_TEXTURE2D, 0);
@@ -640,48 +646,60 @@ void CBillboardShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	pRectMaterial->SetTexture(pTexture);
 #endif
 
-	CTexturedRectMesh* pRectMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, fxSize, fySize, 0.0f);
+	CBillboardMesh* pRectMesh = new CBillboardMesh(pd3dDevice, pd3dCommandList, pTerrain, 100, fxSize, fySize);
 
 	m_ppObjects = new CGameObject * [m_nObjects];
 
 	XMFLOAT3 xmf3RotateAxis, xmf3SurfaceNormal;
 	CBillboardObject* pBillboardObject = NULL;
-	for (int i = 0, x = 0; x < xObjects; x++)
+	for (int i = 0, t = 0; t < 2; ++t)
 	{
-		for (int z = 0; z < zObjects; z++)
-		{
-			for (int y = 0; y < yObjects; y++)
-			{
-				pBillboardObject = new CBillboardObject;
-				pBillboardObject->SetTextureType(y);
-
-				pBillboardObject->SetMesh(0, pRectMesh);
+		pBillboardObject = new CBillboardObject;
+		pBillboardObject->SetTextureType(t);
+		pBillboardObject->SetMesh(0, pRectMesh);
 #ifndef _WITH_BATCH_MATERIAL
-				pBillboardObject->SetMaterial(pRectMaterial);
+		pBillboardObject->SetMaterial(pRectMaterial);
 #endif
-				//float xPosition = x * fxPitch;
-				//float zPosition = z * fzPitch;
-
-				float xPosition = x * fxPitch;
-				float zPosition = z * fzPitch;
-
-				float fHeight = pTerrain->GetHeight(xPosition, zPosition);
-
-				pBillboardObject->SetPosition(xPosition, fHeight + (y * 3.0f * fyPitch) + (fySize / 2), zPosition);
-				if (y == 0 && pBillboardObject->GetTextureType() == 1)
-				{
-					xmf3SurfaceNormal = pTerrain->GetNormal(xPosition, zPosition);
-					xmf3RotateAxis = Vector3::CrossProduct(XMFLOAT3(0.0f, 1.0f, 0.0f), xmf3SurfaceNormal);
-					if (Vector3::IsZero(xmf3RotateAxis)) xmf3RotateAxis = XMFLOAT3(0.0f, 1.0f, 0.0f);
-					float fAngle = acos(Vector3::DotProduct(XMFLOAT3(0.0f, 1.0f, 0.0f), xmf3SurfaceNormal));
-					pBillboardObject->Rotate(&xmf3RotateAxis, XMConvertToDegrees(fAngle));
-				}
-				pBillboardObject->SetRotationAxis(XMFLOAT3(0.0f, 1.0f, 0.0f));
-				pBillboardObject->SetCbvGPUDescriptorHandlePtr(m_d3dCbvGPUDescriptorStartHandle.ptr + (::gnCbvSrvDescriptorIncrementSize * i));
-				m_ppObjects[i++] = pBillboardObject;
-			}
-		}
+		pBillboardObject->SetCbvGPUDescriptorHandlePtr(m_d3dCbvGPUDescriptorStartHandle.ptr + (::gnCbvSrvDescriptorIncrementSize * i));
+		m_ppObjects[i++] = pBillboardObject;
 	}
+	
+//	for (int i = 0, x = 0; x < xObjects; x++)
+//	{
+//		for (int z = 0; z < zObjects; z++)
+//		{
+//			for (int y = 0; y < yObjects; y++)
+//			{
+//				pBillboardObject = new CBillboardObject;
+//				pBillboardObject->SetTextureType(y);
+//
+//				pBillboardObject->SetMesh(0, pRectMesh);
+//#ifndef _WITH_BATCH_MATERIAL
+//				pBillboardObject->SetMaterial(pRectMaterial);
+//#endif
+//				//float xPosition = x * fxPitch;
+//				//float zPosition = z * fzPitch;
+//
+//				float xPosition = x * fxPitch;
+//				float zPosition = z * fzPitch;
+//
+//				float fHeight = pTerrain->GetHeight(xPosition, zPosition);
+//
+//				pBillboardObject->SetPosition(xPosition, fHeight + (y * 3.0f * fyPitch) + (fySize / 2), zPosition);
+//				if (y == 0 && pBillboardObject->GetTextureType() == 1)
+//				{
+//					xmf3SurfaceNormal = pTerrain->GetNormal(xPosition, zPosition);
+//					xmf3RotateAxis = Vector3::CrossProduct(XMFLOAT3(0.0f, 1.0f, 0.0f), xmf3SurfaceNormal);
+//					if (Vector3::IsZero(xmf3RotateAxis)) xmf3RotateAxis = XMFLOAT3(0.0f, 1.0f, 0.0f);
+//					float fAngle = acos(Vector3::DotProduct(XMFLOAT3(0.0f, 1.0f, 0.0f), xmf3SurfaceNormal));
+//					pBillboardObject->Rotate(&xmf3RotateAxis, XMConvertToDegrees(fAngle));
+//				}
+//				pBillboardObject->SetRotationAxis(XMFLOAT3(0.0f, 1.0f, 0.0f));
+//				pBillboardObject->SetCbvGPUDescriptorHandlePtr(m_d3dCbvGPUDescriptorStartHandle.ptr + (::gnCbvSrvDescriptorIncrementSize * i));
+//				m_ppObjects[i++] = pBillboardObject;
+//			}
+//		}
+//	}
 }
 
 void CBillboardShader::AnimateObjects(float fTimeElapsed, CCamera* pCamera)
@@ -764,4 +782,9 @@ D3D12_INPUT_LAYOUT_DESC CBillboardShader::CreateInputLayout()
 	d3dInputLayoutDesc.NumElements = nInputElementDescs;
 
 	return(d3dInputLayoutDesc);
+}
+
+D3D12_PRIMITIVE_TOPOLOGY_TYPE CBillboardShader::GetPrimitiveTopologyType()
+{
+	return D3D12_PRIMITIVE_TOPOLOGY_TYPE_POINT;
 }
