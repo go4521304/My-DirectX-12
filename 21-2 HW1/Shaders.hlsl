@@ -292,6 +292,5 @@ float4 PS_Billboard(GS_OUT input) : SV_TARGET
 	cColor = gtxtBillboardTexture[billType].Sample(gWrapSamplerState, input.uv);
 #endif
 	clip(cColor.a - 0.15f);
-	//return(cColor);
-	return float4(1.0f, 1.0f, 1.0f, 1.0f);
+	return(cColor);
 }

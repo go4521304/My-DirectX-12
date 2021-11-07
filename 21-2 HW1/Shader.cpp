@@ -611,20 +611,8 @@ void CBillboardShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 {
 	CHeightMapTerrain* pTerrain = (CHeightMapTerrain*)pContext;
 
-	float fxPitch = 12.0f * 3.5f;
-	float fyPitch = 12.0f * 3.5f;
-	float fzPitch = 12.0f * 3.5f;
-
-	float fxSize = 10.0f;
-	float fySize = 30.0f;
-
-	float fTerrainWidth = pTerrain->GetWidth();
-	float fTerrainLength = pTerrain->GetLength();
-
-	int xObjects = int(fTerrainWidth / fxPitch);
-	int yObjects = 2;
-	int zObjects = int(fTerrainLength / fzPitch);
-	//m_nObjects = (xObjects * yObjects * zObjects);
+	float fxSize = 20.0f;
+	float fySize = 40.0f;
 	m_nObjects = 2;
 	
 	CTexture* pTexture = new CTexture(2, RESOURCE_TEXTURE2D_ARRAY, 0, 1);
@@ -646,7 +634,9 @@ void CBillboardShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	pRectMaterial->SetTexture(pTexture);
 #endif
 
-	CBillboardMesh* pRectMesh = new CBillboardMesh(pd3dDevice, pd3dCommandList, pTerrain, 100, fxSize, fySize);
+	CBillboardMesh* pTreeMesh = new CBillboardMesh(pd3dDevice, pd3dCommandList, pTerrain, 0);
+	CBillboardMesh* pGrassMesh = new CBillboardMesh(pd3dDevice, pd3dCommandList, pTerrain, 1);
+
 
 	m_ppObjects = new CGameObject * [m_nObjects];
 
@@ -656,7 +646,11 @@ void CBillboardShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	{
 		pBillboardObject = new CBillboardObject;
 		pBillboardObject->SetTextureType(t);
-		pBillboardObject->SetMesh(0, pRectMesh);
+		if (t == 0)
+			pBillboardObject->SetMesh(0, pTreeMesh);
+		else if (t == 1)
+			pBillboardObject->SetMesh(0, pGrassMesh);
+
 #ifndef _WITH_BATCH_MATERIAL
 		pBillboardObject->SetMaterial(pRectMaterial);
 #endif

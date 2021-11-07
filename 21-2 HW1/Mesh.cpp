@@ -589,26 +589,68 @@ CTexturedRectMesh::~CTexturedRectMesh()
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
-CBillboardMesh::CBillboardMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, void* pContext, UINT nNum, float fWidth, float fHeight) : CMesh(pd3dDevice, pd3dCommandList)
+CBillboardMesh::CBillboardMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, void* pContext, UINT mType) : CMesh(pd3dDevice, pd3dCommandList)
 {
 	CHeightMapTerrain* pTerrain = (CHeightMapTerrain*)pContext;
 	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_POINTLIST;
 
-	m_nStride = sizeof(CBillboardVertex);
-	m_nVertices = nNum;
-	XMFLOAT3 xmf3Position;
-	XMFLOAT2 xmf2Size = {fWidth, fHeight};
-	CBillboardVertex* pBillboardVertices = new CBillboardVertex[nNum];
-
 	int fTerrainWidth = pTerrain->GetWidth();
 	int fTerrainLength = pTerrain->GetLength();
 
-	for (int i = 0; i < nNum; ++i)
+	float startX = 0.0f, startZ = 0.0f;
+	float fxPitch = 0.0f, fyPitch = 0.0f, fzPitch = 0.0f;
+	int xObjects = 0, yObjects = 0, zObjects = 0;
+	int nNum;
+
+	XMFLOAT3 xmf3Position;
+	XMFLOAT2 xmf2Size = { 20.0f, 30.0f };
+
+	if (mType == 0)
 	{
-		float fxTerrain = xmf3Position.x = rand() % fTerrainWidth;
-		float fyTerrain = xmf3Position.y = rand() % fTerrainLength;
-		xmf3Position.y = pTerrain->GetHeight(fxTerrain, fyTerrain, false) + (fHeight / 2);
-		pBillboardVertices[i] = CBillboardVertex(xmf3Position, xmf2Size);
+		startX = 0.0f;
+		startZ = 0.0f;
+
+		xObjects = int(fTerrainWidth / (50));
+		yObjects = 1;
+		zObjects = int(fTerrainLength / (50));
+
+		fxPitch = fTerrainWidth / xObjects;
+		fzPitch = fTerrainLength / zObjects;
+
+		xmf2Size = { 20.0f, 30.0f };
+	}
+
+	else if (mType == 1)
+	{
+		startX = 0.0f;
+		startZ = 0.0f;
+
+		fxPitch = 5.0f;
+		fzPitch = 5.0f;
+
+		xObjects = int(520 / (fxPitch));
+		yObjects = 1;
+		zObjects = int(1200 / (fzPitch));
+
+		xmf2Size = { 10.0f, 10.0f };
+	}
+	nNum = (xObjects * yObjects * zObjects);
+
+	m_nStride = sizeof(CBillboardVertex);
+	m_nVertices = nNum;
+
+	CBillboardVertex* pBillboardVertices = new CBillboardVertex[nNum];
+
+	for (int i = 0, x = 0; x < xObjects; ++x)
+	{
+		for (int z = 0; z < zObjects; ++z)
+		{
+			float fxTerrain = xmf3Position.x = x * fxPitch + startX;
+			float fyTerrain = xmf3Position.z = z * fzPitch + startZ;
+
+			xmf3Position.y = pTerrain->GetHeight(fxTerrain, fyTerrain, false) + (xmf2Size.y / 2);
+			pBillboardVertices[i++] = CBillboardVertex(xmf3Position, xmf2Size);
+		}
 	}
 
 	m_pd3dVertexBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, pBillboardVertices, m_nStride * m_nVertices,
@@ -617,6 +659,8 @@ CBillboardMesh::CBillboardMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 	m_d3dVertexBufferView.BufferLocation = m_pd3dVertexBuffer->GetGPUVirtualAddress();
 	m_d3dVertexBufferView.StrideInBytes = m_nStride;
 	m_d3dVertexBufferView.SizeInBytes = m_nStride * m_nVertices;
+
+	delete[] pBillboardVertices;
 }
 
 CBillboardMesh::~CBillboardMesh()
