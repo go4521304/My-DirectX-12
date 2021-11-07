@@ -608,16 +608,15 @@ void CSkyBox::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamer
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void CBillboardObject::Animate(float fTimeElapsed, CCamera* pCamera)
+void CBulletObject::Animate(float fTimeElapsed, CCamera* pCamera)
 {
 	CGameObject::Rotate(&m_xmf3RotationAxis, fTimeElapsed);
 	XMFLOAT3 xmfCameraPosition = pCamera->GetPosition();
 	SetLookAt(xmfCameraPosition);
 }
 
-void CBillboardObject::SetLookAt(XMFLOAT3& xmf3Target)
+void CBulletObject::SetLookAt(XMFLOAT3& xmf3Target)
 {
-	//XMFLOAT3 xmf3Up(0.0f, 1.0f, 0.0f);
 	XMFLOAT3 xmf3Up = GetUp();
 	XMFLOAT3 xmf3Position(m_xmf4x4World._41, m_xmf4x4World._42, m_xmf4x4World._43);
 	XMFLOAT3 xmf3Look = Vector3::Normalize(Vector3::Subtract(xmf3Target, xmf3Position));

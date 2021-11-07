@@ -267,8 +267,18 @@ public:
 class CBillboardObject : public CGameObject
 {
 private:
-	XMFLOAT3					m_xmf3RotationAxis;
 	UINT						m_textureType = 0;	// 0 tree / 1 grassPink
+public:
+	virtual void SetTextureType(UINT type) { m_textureType = type; }
+	virtual UINT GetTextureType() { return m_textureType; }
+};
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+class CBulletObject : public CGameObject
+{
+private:
+	XMFLOAT3					m_xmf3RotationAxis;
+	UINT						m_textureType = 0;	// bomb state
 public:
 	void SetRotationAxis(XMFLOAT3 xmf3RotationAxis) { m_xmf3RotationAxis = xmf3RotationAxis; }
 	virtual void Animate(float fTimeElapsed, CCamera* pCamera);

@@ -628,7 +628,7 @@ CBillboardMesh::CBillboardMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 		fxPitch = 5.0f;
 		fzPitch = 5.0f;
 
-		xObjects = int(520 / (fxPitch));
+		xObjects = int(450 / (fxPitch));
 		yObjects = 1;
 		zObjects = int(1200 / (fzPitch));
 
