@@ -26,6 +26,8 @@ ConstantBuffer<CB_PLAYER_INFO> gcbPlayerObjectInfo : register(b0);
 ConstantBuffer<CB_CAMERA_INFO> gcbCameraInfo : register(b1);
 ConstantBuffer<CB_GAMEOBJECT_INFO> gcbGameObjectInfo : register(b2);
 ConstantBuffer< CB_BILLBOARD_INDEX> gcbTextureType : register(b3);
+ConstantBuffer< CB_BILLBOARD_INDEX> gcbBombTexture : register(b4);
+
 
 #else
 cbuffer cbPlayerInfo : register(b0)
@@ -47,6 +49,10 @@ cbuffer cbGameObjectInfo : register(b2)
 cbuffer cbTextureType : register(b3)
 {
 	uint		billType : packoffset(c0);
+};
+cbuffer cbBombTexture : register(b4)
+{
+	uint		bombIndex : packoffset(c0);
 };
 #endif
 
@@ -285,11 +291,25 @@ void GS_Billboard(point VS_OUT input[1], uint primID : SV_PrimitiveID, inout Tri
 float4 PS_Billboard(GS_OUT input) : SV_TARGET
 {
 	float4 cColor;
-	float3 uvw = float3(input.uv, (input.primID % 4));
 #ifdef _WITH_CONSTANT_BUFFER_SYNTAX
 	cColor = gtxtBillboardTexture[gcbTextureType.type].Sample(gWrapSamplerState, input.uv);
 #else
 	cColor = gtxtBillboardTexture[billType].Sample(gWrapSamplerState, input.uv);
+#endif
+	clip(cColor.a - 0.15f);
+	return(cColor);
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+Texture2D gtxtBombTexture[21] : register(t11);
+
+float4 PSBullet(VS_TEXTURED_OUTPUT input) : SV_TARGET
+{
+	float4 cColor;
+#ifdef _WITH_CONSTANT_BUFFER_SYNTAX
+	cColor = gtxtBombTexture[gcbBombTexture.type].Sample(gWrapSamplerState, input.uv);
+#else
+	cColor = gtxtBombTexture[bombIndex].Sample(gWrapSamplerState, input.uv);
 #endif
 	clip(cColor.a - 0.15f);
 	return(cColor);

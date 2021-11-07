@@ -304,7 +304,7 @@ void CGameObject::Animate(float fTimeElapsed)
 {
 }
 
-void CGameObject::Animate(float fTimeElapsed, CCamera* pCamera)
+void CGameObject::Animate(float fTimeElapsed, CCamera* pCamera, void* pContext)
 {
 }
 
@@ -608,11 +608,55 @@ void CSkyBox::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamer
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void CBulletObject::Animate(float fTimeElapsed, CCamera* pCamera)
+const float Bullet_Speed = 1000.0f;
+const float Bullet_LifeTime = 5.0f;
+
+void CBulletObject::Animate(float fTimeElapsed, CCamera* pCamera, void* pContext)
 {
-	CGameObject::Rotate(&m_xmf3RotationAxis, fTimeElapsed);
-	XMFLOAT3 xmfCameraPosition = pCamera->GetPosition();
-	SetLookAt(xmfCameraPosition);
+	if (m_isActive)
+	{
+		if (m_isExploed)
+		{
+			for (int i = 0; i < 20; ++i)
+			{
+				if (m_lifeTime > Bullet_LifeTime - (i * (Bullet_LifeTime / 20)))
+				{
+					m_textureType = i;
+					break;
+				}
+			}
+		}
+		else
+		{
+			XMFLOAT3 m_tmpPosition = GetPosition();
+
+			CHeightMapTerrain* pTerrain = (CHeightMapTerrain*)pContext;
+			float fHeight = pTerrain->GetHeight(m_tmpPosition.x, m_tmpPosition.z);
+
+			if (m_tmpPosition.y < fHeight)
+			{
+				m_isExploed = TRUE;
+				m_lifeTime = Bullet_LifeTime;
+				m_textureType = 1;
+				SetPosition(m_tmpPosition.x, m_tmpPosition.y + 10.0f, m_tmpPosition.z);
+			}
+			else
+			{
+				XMFLOAT3 speed = { 0.0f, 0.0f, 0.0f };
+				speed = Vector3::Add(speed, Vector3::ScalarProduct(m_direction, Bullet_Speed * fTimeElapsed, false));
+				m_tmpPosition = Vector3::Add(m_tmpPosition, speed);
+				SetPosition(m_tmpPosition);
+			}
+		}
+
+		CGameObject::Rotate(&m_xmf3RotationAxis, fTimeElapsed);
+		XMFLOAT3 xmfCameraPosition = pCamera->GetPosition();
+		SetLookAt(xmfCameraPosition);
+
+		m_lifeTime -= fTimeElapsed;
+		if (m_lifeTime < 0)
+			m_isActive = FALSE;
+	}
 }
 
 void CBulletObject::SetLookAt(XMFLOAT3& xmf3Target)
@@ -625,4 +669,13 @@ void CBulletObject::SetLookAt(XMFLOAT3& xmf3Target)
 	m_xmf4x4World._11 = xmf3Right.x; m_xmf4x4World._12 = xmf3Right.y; m_xmf4x4World._13 = xmf3Right.z;
 	m_xmf4x4World._21 = xmf3Up.x; m_xmf4x4World._22 = xmf3Up.y; m_xmf4x4World._23 = xmf3Up.z;
 	m_xmf4x4World._31 = xmf3Look.x; m_xmf4x4World._32 = xmf3Look.y; m_xmf4x4World._33 = xmf3Look.z;
+}
+
+void CBulletObject::SetActive(XMFLOAT3 direction)
+{
+	m_isActive = TRUE;
+	m_isExploed = FALSE;
+	m_lifeTime = Bullet_LifeTime;
+	m_textureType = 0;
+	m_direction = Vector3::Normalize(direction);
 }

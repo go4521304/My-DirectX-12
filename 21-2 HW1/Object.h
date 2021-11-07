@@ -162,7 +162,7 @@ public:
 	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList *pd3dCommandList);
 
 	virtual void Animate(float fTimeElapsed);
-	virtual void Animate(float fTimeElapsed, CCamera* pCamera);
+	virtual void Animate(float fTimeElapsed, CCamera* pCamera, void* pContext);
 	virtual void OnPrepareRender() { }
 	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera=NULL);
 
@@ -187,6 +187,9 @@ public:
 
 	virtual void SetTextureType(UINT type) {}
 	virtual UINT GetTextureType() { return 0; }
+
+	virtual void SetActive(XMFLOAT3 direction) {}
+	virtual BOOL CheckActive() { return FALSE; }
 };
 
 class CRotatingObject : public CGameObject
@@ -279,11 +282,18 @@ class CBulletObject : public CGameObject
 private:
 	XMFLOAT3					m_xmf3RotationAxis;
 	UINT						m_textureType = 0;	// bomb state
+	BOOL						m_isActive = FALSE;
+	BOOL						m_isExploed = FALSE;
+	float						m_lifeTime = 10.0f;
+	XMFLOAT3					m_direction;
 public:
 	void SetRotationAxis(XMFLOAT3 xmf3RotationAxis) { m_xmf3RotationAxis = xmf3RotationAxis; }
-	virtual void Animate(float fTimeElapsed, CCamera* pCamera);
+	virtual void Animate(float fTimeElapsed, CCamera* pCamera, void* pContext);
 	virtual void SetLookAt(XMFLOAT3& xmf3Target);
 
 	virtual void SetTextureType(UINT type) { m_textureType = type; }
 	virtual UINT GetTextureType() { return m_textureType; }
+
+	virtual void SetActive(XMFLOAT3 direction);
+	virtual BOOL CheckActive() { return m_isActive; }
 };

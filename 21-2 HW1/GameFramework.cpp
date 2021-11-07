@@ -428,7 +428,7 @@ void CGameFramework::BuildObjects()
 
 	m_pPlayer = new CTerrainPlayer(m_pd3dDevice, m_pd3dCommandList, m_pScene->GetGraphicsRootSignature(), m_pScene->GetTerrain(), 1);
 	m_pCamera = m_pPlayer->GetCamera();
-
+	
 	m_pd3dCommandList->Close();
 	ID3D12CommandList *ppd3dCommandLists[] = { m_pd3dCommandList };
 	m_pd3dCommandQueue->ExecuteCommandLists(1, ppd3dCommandLists);
@@ -455,6 +455,11 @@ void CGameFramework::ProcessInput()
 	if (GetKeyboardState(pKeysBuffer) && m_pScene) bProcessedByScene = m_pScene->ProcessInput(pKeysBuffer);
 	if (!bProcessedByScene)
 	{
+		if (pKeysBuffer[VK_CONTROL] & 0xF0)
+		{
+			m_pPlayer->ShootBullet();
+		}
+
 		DWORD dwDirection = 0;
 		if (pKeysBuffer[VK_UP] & 0xF0) dwDirection |= DIR_FORWARD;
 		if (pKeysBuffer[VK_DOWN] & 0xF0) dwDirection |= DIR_BACKWARD;
@@ -492,6 +497,7 @@ void CGameFramework::ProcessInput()
 void CGameFramework::AnimateObjects()
 {
 	if (m_pScene) m_pScene->AnimateObjects(m_GameTimer.GetTimeElapsed(), m_pCamera);
+	m_pPlayer->UpdateBullet(m_GameTimer.GetTimeElapsed(), m_pScene->GetTerrain());
 }
 
 void CGameFramework::WaitForGpuComplete()

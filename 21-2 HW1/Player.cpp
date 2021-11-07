@@ -25,6 +25,10 @@ CPlayer::CPlayer(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dComman
 	m_fPitch = 0.0f;
 	m_fRoll = 0.0f;
 	m_fYaw = 0.0f;
+
+	m_Bullet = new CBulletShader;
+	m_Bullet->CreateShader(pd3dDevice, pd3dGraphicsRootSignature);
+	m_Bullet->BuildObjects(pd3dDevice, pd3dCommandList, pContext);
 }
 
 CPlayer::~CPlayer()
@@ -53,6 +57,9 @@ void CPlayer::ReleaseShaderVariables()
 		m_pd3dcbPlayer->Unmap(0, NULL);
 		m_pd3dcbPlayer->Release();
 	}
+
+	if (m_Bullet)
+		m_Bullet->ReleaseObjects();
 }
 
 void CPlayer::UpdateShaderVariables(ID3D12GraphicsCommandList *pd3dCommandList)
@@ -181,6 +188,12 @@ void CPlayer::Update(float fTimeElapsed)
 	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::ScalarProduct(m_xmf3Velocity, -fDeceleration, true));
 }
 
+void CPlayer::UpdateBullet(float fTimeElapsed, void* pContext)
+{
+	shootRate -= fTimeElapsed;
+	m_Bullet->AnimateObjects(fTimeElapsed, m_pCamera, pContext);
+}
+
 CCamera *CPlayer::OnChangeCamera(DWORD nNewCameraMode, DWORD nCurrentCameraMode)
 {
 	CCamera *pNewCamera = NULL;
@@ -237,6 +250,16 @@ void CPlayer::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamer
 {
 	DWORD nCameraMode = (pCamera) ? pCamera->GetMode() : 0x00;
 	if (nCameraMode == THIRD_PERSON_CAMERA) CGameObject::Render(pd3dCommandList, pCamera);
+	m_Bullet->Render(pd3dCommandList, pCamera);
+}
+
+void CPlayer::ShootBullet()
+{
+	if (shootRate <= 0.0f)
+	{
+		m_Bullet->SetBullet(GetPosition(), GetLookVector());
+		shootRate = 0.5f;
+	}
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////

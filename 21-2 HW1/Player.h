@@ -9,6 +9,8 @@
 
 #include "Object.h"
 #include "Camera.h"
+#include "Shader.h"
+
 
 struct CB_PLAYER_INFO
 {
@@ -38,6 +40,10 @@ protected:
 	LPVOID						m_pCameraUpdatedContext = NULL;
 
 	CCamera						*m_pCamera = NULL;
+
+	CBulletShader				*m_Bullet = NULL;
+	float						shootRate = 0.0f;
+
 
 public:
 	CPlayer(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature, void *pContext=NULL, int nMeshes = 1);
@@ -69,6 +75,7 @@ public:
 	void Rotate(float x, float y, float z);
 
 	void Update(float fTimeElapsed);
+	void UpdateBullet(float fTimeElapsed, void* pContext);
 
 	virtual void OnPlayerUpdateCallback(float fTimeElapsed) { }
 	void SetPlayerUpdatedContext(LPVOID pContext) { m_pPlayerUpdatedContext = pContext; }
@@ -85,6 +92,8 @@ public:
 	virtual CCamera *ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed) { return(NULL); }
 	virtual void OnPrepareRender();
 	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera = NULL);
+
+	void ShootBullet();
 
 protected:
 	ID3D12Resource					*m_pd3dcbPlayer = NULL;

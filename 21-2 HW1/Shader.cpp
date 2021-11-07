@@ -657,50 +657,13 @@ void CBillboardShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 		pBillboardObject->SetCbvGPUDescriptorHandlePtr(m_d3dCbvGPUDescriptorStartHandle.ptr + (::gnCbvSrvDescriptorIncrementSize * i));
 		m_ppObjects[i++] = pBillboardObject;
 	}
-	
-//	for (int i = 0, x = 0; x < xObjects; x++)
-//	{
-//		for (int z = 0; z < zObjects; z++)
-//		{
-//			for (int y = 0; y < yObjects; y++)
-//			{
-//				pBillboardObject = new CBillboardObject;
-//				pBillboardObject->SetTextureType(y);
-//
-//				pBillboardObject->SetMesh(0, pRectMesh);
-//#ifndef _WITH_BATCH_MATERIAL
-//				pBillboardObject->SetMaterial(pRectMaterial);
-//#endif
-//				//float xPosition = x * fxPitch;
-//				//float zPosition = z * fzPitch;
-//
-//				float xPosition = x * fxPitch;
-//				float zPosition = z * fzPitch;
-//
-//				float fHeight = pTerrain->GetHeight(xPosition, zPosition);
-//
-//				pBillboardObject->SetPosition(xPosition, fHeight + (y * 3.0f * fyPitch) + (fySize / 2), zPosition);
-//				if (y == 0 && pBillboardObject->GetTextureType() == 1)
-//				{
-//					xmf3SurfaceNormal = pTerrain->GetNormal(xPosition, zPosition);
-//					xmf3RotateAxis = Vector3::CrossProduct(XMFLOAT3(0.0f, 1.0f, 0.0f), xmf3SurfaceNormal);
-//					if (Vector3::IsZero(xmf3RotateAxis)) xmf3RotateAxis = XMFLOAT3(0.0f, 1.0f, 0.0f);
-//					float fAngle = acos(Vector3::DotProduct(XMFLOAT3(0.0f, 1.0f, 0.0f), xmf3SurfaceNormal));
-//					pBillboardObject->Rotate(&xmf3RotateAxis, XMConvertToDegrees(fAngle));
-//				}
-//				pBillboardObject->SetRotationAxis(XMFLOAT3(0.0f, 1.0f, 0.0f));
-//				pBillboardObject->SetCbvGPUDescriptorHandlePtr(m_d3dCbvGPUDescriptorStartHandle.ptr + (::gnCbvSrvDescriptorIncrementSize * i));
-//				m_ppObjects[i++] = pBillboardObject;
-//			}
-//		}
-//	}
 }
 
 void CBillboardShader::AnimateObjects(float fTimeElapsed, CCamera* pCamera)
 {
 	for (int j = 0; j < m_nObjects; j++)
 	{
-		m_ppObjects[j]->Animate(fTimeElapsed, pCamera);
+		m_ppObjects[j]->Animate(fTimeElapsed);
 	}
 }
 
@@ -781,4 +744,144 @@ D3D12_INPUT_LAYOUT_DESC CBillboardShader::CreateInputLayout()
 D3D12_PRIMITIVE_TOPOLOGY_TYPE CBillboardShader::GetPrimitiveTopologyType()
 {
 	return D3D12_PRIMITIVE_TOPOLOGY_TYPE_POINT;
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+CBulletShader::CBulletShader()
+{
+}
+
+CBulletShader::~CBulletShader()
+{
+}
+
+void CBulletShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, void* pContext)
+{
+	CTexture* pTexture = new CTexture(21, RESOURCE_TEXTURE2D_ARRAY, 0, 1);
+	pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Image/bomb (1).dds", RESOURCE_TEXTURE2D, 0);
+	pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Image/bomb (2).dds", RESOURCE_TEXTURE2D, 1);
+	pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Image/bomb (3).dds", RESOURCE_TEXTURE2D, 2);
+	pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Image/bomb (4).dds", RESOURCE_TEXTURE2D, 3);
+	pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Image/bomb (5).dds", RESOURCE_TEXTURE2D, 4);
+	pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Image/bomb (6).dds", RESOURCE_TEXTURE2D, 5);
+	pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Image/bomb (7).dds", RESOURCE_TEXTURE2D, 6);
+	pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Image/bomb (8).dds", RESOURCE_TEXTURE2D, 7);
+	pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Image/bomb (9).dds", RESOURCE_TEXTURE2D, 8);
+	pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Image/bomb (10).dds", RESOURCE_TEXTURE2D, 9);
+	pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Image/bomb (11).dds", RESOURCE_TEXTURE2D, 10);
+	pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Image/bomb (12).dds", RESOURCE_TEXTURE2D, 11);
+	pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Image/bomb (13).dds", RESOURCE_TEXTURE2D, 12);
+	pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Image/bomb (14).dds", RESOURCE_TEXTURE2D, 13);
+	pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Image/bomb (15).dds", RESOURCE_TEXTURE2D, 14);
+	pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Image/bomb (16).dds", RESOURCE_TEXTURE2D, 15);
+	pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Image/bomb (17).dds", RESOURCE_TEXTURE2D, 16);
+	pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Image/bomb (18).dds", RESOURCE_TEXTURE2D, 17);
+	pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Image/bomb (19).dds", RESOURCE_TEXTURE2D, 18);
+	pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Image/bomb (20).dds", RESOURCE_TEXTURE2D, 19);
+	pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Image/bomb (21).dds", RESOURCE_TEXTURE2D, 20);
+
+	UINT ncbElementBytes = ((sizeof(CB_GAMEOBJECT_INFO) + 255) & ~255);
+	m_nObjects = 10;
+
+	CreateCbvSrvDescriptorHeaps(pd3dDevice, m_nObjects, 21);
+	CreateShaderVariables(pd3dDevice, pd3dCommandList);
+	CreateConstantBufferViews(pd3dDevice, m_nObjects, m_pd3dcbGameObjects, ncbElementBytes);
+	CreateShaderResourceViews(pd3dDevice, pTexture, 0, 9);
+
+#ifdef _WITH_BATCH_MATERIAL
+	m_pMaterial = new CMaterial();
+	m_pMaterial->SetTexture(pTexture);
+#else
+	CMaterial* pRectMaterial = new CMaterial();
+	pRectMaterial->SetTexture(pTexture);
+#endif
+
+	CTexturedRectMesh* pRectMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 20.0f, 20.0f, 0.0f);
+
+	m_ppObjects = new CGameObject * [m_nObjects];
+
+	XMFLOAT3 xmf3RotateAxis, xmf3SurfaceNormal;
+	CBulletObject* pBulletObject = NULL;
+	for (int i = 0; i< m_nObjects; i++)
+	{
+		pBulletObject = new CBulletObject;
+		pBulletObject->SetTextureType(0);
+
+		pBulletObject->SetMesh(0, pRectMesh);
+#ifndef _WITH_BATCH_MATERIAL
+		pBulletObject->SetMaterial(pRectMaterial);
+#endif
+		pBulletObject->SetPosition(0.0f, 0.0f, 0.0f);
+		pBulletObject->SetRotationAxis(XMFLOAT3(0.0f, 1.0f, 0.0f));
+		pBulletObject->SetCbvGPUDescriptorHandlePtr(m_d3dCbvGPUDescriptorStartHandle.ptr + (::gnCbvSrvDescriptorIncrementSize * i));
+		m_ppObjects[i] = pBulletObject;
+	}
+}
+
+void CBulletShader::AnimateObjects(float fTimeElapsed, CCamera* pCamera, void* pContext)
+{
+	for (int j = 0; j < m_nObjects; j++)
+	{
+		m_ppObjects[j]->Animate(fTimeElapsed, pCamera, pContext);
+	}
+}
+
+D3D12_SHADER_BYTECODE CBulletShader::CreatePixelShader(ID3DBlob** ppd3dShaderBlob)
+{
+	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "PSBullet", "ps_5_1", ppd3dShaderBlob));
+}
+
+D3D12_BLEND_DESC CBulletShader::CreateBlendState()
+{
+	D3D12_BLEND_DESC d3dBlendDesc;
+	::ZeroMemory(&d3dBlendDesc, sizeof(D3D12_BLEND_DESC));
+	d3dBlendDesc.AlphaToCoverageEnable = FALSE;
+	d3dBlendDesc.IndependentBlendEnable = FALSE;
+	d3dBlendDesc.RenderTarget[0].BlendEnable = TRUE;
+	d3dBlendDesc.RenderTarget[0].LogicOpEnable = FALSE;
+	d3dBlendDesc.RenderTarget[0].SrcBlend = D3D12_BLEND_SRC_ALPHA;
+	d3dBlendDesc.RenderTarget[0].DestBlend = D3D12_BLEND_INV_SRC_ALPHA;
+	d3dBlendDesc.RenderTarget[0].BlendOp = D3D12_BLEND_OP_ADD;
+	d3dBlendDesc.RenderTarget[0].SrcBlendAlpha = D3D12_BLEND_ONE;
+	d3dBlendDesc.RenderTarget[0].DestBlendAlpha = D3D12_BLEND_ZERO;
+	d3dBlendDesc.RenderTarget[0].BlendOpAlpha = D3D12_BLEND_OP_ADD;
+	d3dBlendDesc.RenderTarget[0].LogicOp = D3D12_LOGIC_OP_NOOP;
+	d3dBlendDesc.RenderTarget[0].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
+
+	return(d3dBlendDesc);
+}
+
+void CBulletShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
+{
+	CTexturedShader::Render(pd3dCommandList, pCamera);
+
+#ifdef _WITH_BATCH_MATERIAL
+	if (m_pMaterial) m_pMaterial->UpdateShaderVariables(pd3dCommandList);
+#endif
+
+	UINT textureType = 0;
+
+	for (int j = 0; j < m_nObjects; j++)
+	{
+		if (m_ppObjects[j] && m_ppObjects[j]->CheckActive() == TRUE)
+		{
+			textureType = m_ppObjects[j]->GetTextureType();
+			pd3dCommandList->SetGraphicsRoot32BitConstant(10, textureType, 0);
+			m_ppObjects[j]->Render(pd3dCommandList, pCamera);
+		}
+	}
+}
+
+void CBulletShader::SetBullet(XMFLOAT3 m_Position, XMFLOAT3 m_Direction)
+{
+	for (int i = 0; i < m_nObjects; ++i)
+	{
+		if (m_ppObjects[i]->CheckActive() == FALSE)
+		{
+			m_ppObjects[i]->SetPosition(m_Position);
+			m_ppObjects[i]->SetActive(m_Direction);
+			break;
+		}
+	}
 }
