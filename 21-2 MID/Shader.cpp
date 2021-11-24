@@ -60,7 +60,7 @@ D3D12_SHADER_BYTECODE CShader::CompileShaderFromFile(WCHAR* pszFileName, LPCSTR 
 	if (FAILED(hr) && errorMessages)
 	{
 		const char* errorMsg = (const char*)errorMessages->GetBufferPointer();
-		MessageBox(nullptr, LPCWSTR(errorMsg), L"Shader Compilation Error", MB_RETRYCANCEL);
+		MessageBoxA(nullptr, errorMsg, "Shader Compilation Error", MB_RETRYCANCEL);
 	}
 	D3D12_SHADER_BYTECODE d3dShaderByteCode;
 	d3dShaderByteCode.BytecodeLength = (*ppd3dShaderBlob)->GetBufferSize();
@@ -613,7 +613,7 @@ void CBillboardShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 
 	float fxSize = 20.0f;
 	float fySize = 40.0f;
-	m_nObjects = 2;
+	m_nObjects = 1;
 	
 	CTexture* pTexture = new CTexture(2, RESOURCE_TEXTURE2D_ARRAY, 0, 1);
 	pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Image/tree.dds", RESOURCE_TEXTURE2D, 0);
@@ -634,29 +634,22 @@ void CBillboardShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	pRectMaterial->SetTexture(pTexture);
 #endif
 
-	CBillboardMesh* pTreeMesh = new CBillboardMesh(pd3dDevice, pd3dCommandList, pTerrain, 0);
-	CBillboardMesh* pGrassMesh = new CBillboardMesh(pd3dDevice, pd3dCommandList, pTerrain, 1);
+	CBillboardMesh* pMesh = new CBillboardMesh(pd3dDevice, pd3dCommandList, pTerrain);
 
 
 	m_ppObjects = new CGameObject * [m_nObjects];
 
 	XMFLOAT3 xmf3RotateAxis, xmf3SurfaceNormal;
-	CBillboardObject* pBillboardObject = NULL;
-	for (int i = 0, t = 0; t < 2; ++t)
-	{
-		pBillboardObject = new CBillboardObject;
-		pBillboardObject->SetTextureType(t);
-		if (t == 0)
-			pBillboardObject->SetMesh(0, pTreeMesh);
-		else if (t == 1)
-			pBillboardObject->SetMesh(0, pGrassMesh);
+	CGameObject* pBillboardObject = NULL;
+	pBillboardObject = new CGameObject;
+	//pBillboardObject->SetTextureType(t);
+	pBillboardObject->SetMesh(0, pMesh);
 
 #ifndef _WITH_BATCH_MATERIAL
-		pBillboardObject->SetMaterial(pRectMaterial);
+	pBillboardObject->SetMaterial(pRectMaterial);
 #endif
-		pBillboardObject->SetCbvGPUDescriptorHandlePtr(m_d3dCbvGPUDescriptorStartHandle.ptr + (::gnCbvSrvDescriptorIncrementSize * i));
-		m_ppObjects[i++] = pBillboardObject;
-	}
+	pBillboardObject->SetCbvGPUDescriptorHandlePtr(m_d3dCbvGPUDescriptorStartHandle.ptr + (::gnCbvSrvDescriptorIncrementSize));
+	m_ppObjects[0] = pBillboardObject;
 }
 
 void CBillboardShader::AnimateObjects(float fTimeElapsed, CCamera* pCamera)
@@ -702,37 +695,14 @@ D3D12_BLEND_DESC CBillboardShader::CreateBlendState()
 	return(d3dBlendDesc);
 }
 
-void CBillboardShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
-{
-	CTexturedShader::Render(pd3dCommandList, pCamera);
-
-#ifdef _WITH_BATCH_MATERIAL
-	if (m_pMaterial) m_pMaterial->UpdateShaderVariables(pd3dCommandList);
-#endif
-
-	UINT textureType = 0;
-
-	for (int j = 0; j < m_nObjects; j++)
-	{
-		if (m_ppObjects[j])
-		{
-			if (textureType != m_ppObjects[j]->GetTextureType())
-			{
-				textureType = m_ppObjects[j]->GetTextureType();
-				pd3dCommandList->SetGraphicsRoot32BitConstant(8, textureType, 0);
-			}
-			m_ppObjects[j]->Render(pd3dCommandList, pCamera);
-		}
-	}
-}
-
 D3D12_INPUT_LAYOUT_DESC CBillboardShader::CreateInputLayout()
 {
-	UINT nInputElementDescs = 2;
+	UINT nInputElementDescs = 3;
 	D3D12_INPUT_ELEMENT_DESC* pd3dInputElementDescs = new D3D12_INPUT_ELEMENT_DESC[nInputElementDescs];
 
 	pd3dInputElementDescs[0] = { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
 	pd3dInputElementDescs[1] = { "SIZE", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+	pd3dInputElementDescs[2] = { "BILL_TYPE", 0, DXGI_FORMAT_R32_UINT, 0, 20, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
 
 	D3D12_INPUT_LAYOUT_DESC d3dInputLayoutDesc;
 	d3dInputLayoutDesc.pInputElementDescs = pd3dInputElementDescs;

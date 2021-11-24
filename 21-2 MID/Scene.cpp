@@ -163,6 +163,10 @@ ID3D12RootSignature *CScene::CreateGraphicsRootSignature(ID3D12Device *pd3dDevic
 	pd3dRootParameters[7].DescriptorTable.pDescriptorRanges = &pd3dDescriptorRanges[5];
 	pd3dRootParameters[7].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 
+	// 인덱스 필요 없도록 변경중
+	// -텍스처 선택 인덱스는 이제 필요없음
+	// -폭탄도 변경할 예정
+
 	// 텍스처 선택 인덱스
 	pd3dRootParameters[8].ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
 	pd3dRootParameters[8].Constants.Num32BitValues = 1;

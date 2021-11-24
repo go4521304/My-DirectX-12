@@ -228,11 +228,13 @@ Texture2D gtxtBillboardTexture[2] : register(t9);
 struct VS_IN {
 	float3 posW : POSITION;
 	float2 sizeW : SIZE;
+	uint typeID : BILL_TYPE;
 };
 
 struct VS_OUT {
 	float3 centerW : POSITION;
 	float2 sizeW : SIZE;
+	uint typeID : BILL_TYPE;
 };
 
 struct GS_OUT {
@@ -240,7 +242,7 @@ struct GS_OUT {
 	float3 posW : POSITION;
 	float3 normalW : NORMAL;
 	float2 uv : TEXCOORD;
-	uint primID : SV_PrimitiveID;
+	uint typeID : BILL_TYPE;
 };
 
 VS_OUT VS_Billboard(VS_IN input)
@@ -248,11 +250,12 @@ VS_OUT VS_Billboard(VS_IN input)
 	VS_OUT output;
 	output.centerW = input.posW;
 	output.sizeW = input.sizeW;
+	output.typeID = input.typeID;
 	return output;
 }
 
 [maxvertexcount(4)]
-void GS_Billboard(point VS_OUT input[1], uint primID : SV_PrimitiveID, inout TriangleStream<GS_OUT> outStream)
+void GS_Billboard(point VS_OUT input[1], inout TriangleStream<GS_OUT> outStream)
 {
 	float3 vUp = float3(0.0f, 1.0f, 0.0f);
 	float3 vLook;
@@ -282,7 +285,7 @@ void GS_Billboard(point VS_OUT input[1], uint primID : SV_PrimitiveID, inout Tri
 #endif
 		output.normalW = vLook;
 		output.uv = pUVs[i];
-		output.primID = primID;
+		output.typeID = input[0].typeID;
 		outStream.Append(output);
 	}
 	outStream.RestartStrip();
@@ -291,11 +294,7 @@ void GS_Billboard(point VS_OUT input[1], uint primID : SV_PrimitiveID, inout Tri
 float4 PS_Billboard(GS_OUT input) : SV_TARGET
 {
 	float4 cColor;
-#ifdef _WITH_CONSTANT_BUFFER_SYNTAX
-	cColor = gtxtBillboardTexture[gcbTextureType.type].Sample(gWrapSamplerState, input.uv);
-#else
-	cColor = gtxtBillboardTexture[billType].Sample(gWrapSamplerState, input.uv);
-#endif
+	cColor = gtxtBillboardTexture[input.typeID].Sample(gWrapSamplerState, input.uv);
 	clip(cColor.a - 0.15f);
 	return(cColor);
 }
