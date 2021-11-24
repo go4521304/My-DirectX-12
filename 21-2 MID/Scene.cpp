@@ -230,7 +230,7 @@ ID3D12RootSignature *CScene::CreateGraphicsRootSignature(ID3D12Device *pd3dDevic
 	if (pd3dErrorBlob)
 	{
 		const char* errorMsg = (const char*)pd3dErrorBlob->GetBufferPointer();
-		MessageBox(nullptr, LPCWSTR(errorMsg), L"Shader Compilation Error", MB_RETRYCANCEL);
+		MessageBoxA(nullptr, errorMsg, "Shader Compilation Error", MB_RETRYCANCEL);
 	}
 	pd3dDevice->CreateRootSignature(0, pd3dSignatureBlob->GetBufferPointer(), pd3dSignatureBlob->GetBufferSize(), __uuidof(ID3D12RootSignature), (void **)&pd3dGraphicsRootSignature);
 	if (pd3dSignatureBlob) pd3dSignatureBlob->Release();
