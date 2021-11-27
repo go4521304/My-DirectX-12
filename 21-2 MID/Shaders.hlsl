@@ -25,8 +25,7 @@ struct CB_BILLBOARD_INDEX
 ConstantBuffer<CB_PLAYER_INFO> gcbPlayerObjectInfo : register(b0);
 ConstantBuffer<CB_CAMERA_INFO> gcbCameraInfo : register(b1);
 ConstantBuffer<CB_GAMEOBJECT_INFO> gcbGameObjectInfo : register(b2);
-ConstantBuffer< CB_BILLBOARD_INDEX> gcbTextureType : register(b3);
-ConstantBuffer< CB_BILLBOARD_INDEX> gcbBombTexture : register(b4);
+ConstantBuffer< CB_BILLBOARD_INDEX> gcbBombTexture : register(b3);
 
 
 #else
@@ -46,11 +45,7 @@ cbuffer cbGameObjectInfo : register(b2)
 {
 	matrix		gmtxWorld : packoffset(c0);
 };
-cbuffer cbTextureType : register(b3)
-{
-	uint		billType : packoffset(c0);
-};
-cbuffer cbBombTexture : register(b4)
+cbuffer cbBombTexture : register(b3)
 {
 	uint		bombIndex : packoffset(c0);
 };

@@ -121,7 +121,7 @@ ID3D12RootSignature *CScene::CreateGraphicsRootSignature(ID3D12Device *pd3dDevic
 	pd3dDescriptorRanges[6].RegisterSpace = 0;
 	pd3dDescriptorRanges[6].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
-	D3D12_ROOT_PARAMETER pd3dRootParameters[11];
+	D3D12_ROOT_PARAMETER pd3dRootParameters[10];
 
 	pd3dRootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
 	pd3dRootParameters[0].Descriptor.ShaderRegister = 0; //Player
@@ -163,29 +163,18 @@ ID3D12RootSignature *CScene::CreateGraphicsRootSignature(ID3D12Device *pd3dDevic
 	pd3dRootParameters[7].DescriptorTable.pDescriptorRanges = &pd3dDescriptorRanges[5];
 	pd3dRootParameters[7].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 
-	// 인덱스 필요 없도록 변경중
-	// -텍스처 선택 인덱스는 이제 필요없음
-	// -폭탄도 변경할 예정
-
-	// 텍스처 선택 인덱스
-	pd3dRootParameters[8].ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
-	pd3dRootParameters[8].Constants.Num32BitValues = 1;
-	pd3dRootParameters[8].Descriptor.ShaderRegister = 3; //Billboard Texture index
-	pd3dRootParameters[8].Descriptor.RegisterSpace = 0;
+	// 폭탄 텍스처
+	pd3dRootParameters[8].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+	pd3dRootParameters[8].DescriptorTable.NumDescriptorRanges = 1;
+	pd3dRootParameters[8].DescriptorTable.pDescriptorRanges = &pd3dDescriptorRanges[6];
 	pd3dRootParameters[8].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 
-	// 폭탄 텍스처
-	pd3dRootParameters[9].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
-	pd3dRootParameters[9].DescriptorTable.NumDescriptorRanges = 1;
-	pd3dRootParameters[9].DescriptorTable.pDescriptorRanges = &pd3dDescriptorRanges[6];
-	pd3dRootParameters[9].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
-
 	// 폭탄 텍스처 인덱스
-	pd3dRootParameters[10].ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
-	pd3dRootParameters[10].Constants.Num32BitValues = 1;
-	pd3dRootParameters[10].Descriptor.ShaderRegister = 4; //Bomb Texture index
-	pd3dRootParameters[10].Descriptor.RegisterSpace = 0;
-	pd3dRootParameters[10].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+	pd3dRootParameters[9].ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
+	pd3dRootParameters[9].Constants.Num32BitValues = 1;
+	pd3dRootParameters[9].Descriptor.ShaderRegister = 3; //Bomb Texture index
+	pd3dRootParameters[9].Descriptor.RegisterSpace = 0;
+	pd3dRootParameters[9].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 
 	D3D12_STATIC_SAMPLER_DESC pd3dSamplerDescs[2];
 

@@ -757,7 +757,7 @@ void CBulletShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	CreateCbvSrvDescriptorHeaps(pd3dDevice, m_nObjects, 21);
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 	CreateConstantBufferViews(pd3dDevice, m_nObjects, m_pd3dcbGameObjects, ncbElementBytes);
-	CreateShaderResourceViews(pd3dDevice, pTexture, 0, 9);
+	CreateShaderResourceViews(pd3dDevice, pTexture, 0, 8);
 
 #ifdef _WITH_BATCH_MATERIAL
 	m_pMaterial = new CMaterial();
@@ -837,7 +837,7 @@ void CBulletShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* 
 		if (m_ppObjects[j] && m_ppObjects[j]->CheckActive() == TRUE)
 		{
 			textureType = m_ppObjects[j]->GetTextureType();
-			pd3dCommandList->SetGraphicsRoot32BitConstant(10, textureType, 0);
+			pd3dCommandList->SetGraphicsRoot32BitConstant(9, textureType, 0);
 			m_ppObjects[j]->Render(pd3dCommandList, pCamera);
 		}
 	}
