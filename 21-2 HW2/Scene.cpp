@@ -33,13 +33,13 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	m_ppShaders = new CShader*[m_nShaders];
 
 	CObjectsShader *pObjectShader = new CObjectsShader();
-	pObjectShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature);
+	pObjectShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature, 0);
 	pObjectShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pTerrain);
 	m_ppShaders[0] = pObjectShader;
 
 	// ºôº¸µå
 	CBillboardShader* pBillShader = new CBillboardShader();
-	pBillShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature);
+	pBillShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature, 0);
 	pBillShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pTerrain);
 	m_ppShaders[1] = pBillShader;
 }

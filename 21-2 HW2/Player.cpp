@@ -27,7 +27,7 @@ CPlayer::CPlayer(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dComman
 	m_fYaw = 0.0f;
 
 	m_Bullet = new CBulletShader;
-	m_Bullet->CreateShader(pd3dDevice, pd3dGraphicsRootSignature);
+	m_Bullet->CreateShader(pd3dDevice, pd3dGraphicsRootSignature, 0);
 	m_Bullet->BuildObjects(pd3dDevice, pd3dCommandList, pContext);
 }
 
@@ -346,7 +346,7 @@ CTerrainPlayer::CTerrainPlayer(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandLi
 	UINT ncbElementBytes = ((sizeof(CB_PLAYER_INFO) + 255) & ~255); //256ÀÇ ¹è¼ö
 
 	CPlayerShader *pShader = new CPlayerShader();
-	pShader->CreateShader(pd3dDevice, pd3dGraphicsRootSignature);
+	pShader->CreateShader(pd3dDevice, pd3dGraphicsRootSignature, 0);
 	pShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
 	pShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 1, 0);
 	pShader->CreateConstantBufferViews(pd3dDevice, 1, m_pd3dcbPlayer, ncbElementBytes);
