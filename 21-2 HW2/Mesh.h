@@ -201,17 +201,16 @@ public:
 class CBillboardVertex : public CVertex
 {
 public:
+	//XMFLOAT3 m_xmfUp;
 	XMFLOAT2 m_xmfSize;
-	UINT m_type;
-
 	CBillboardVertex() {}
-	CBillboardVertex(XMFLOAT3 xmf3Position, XMFLOAT2 xmf2Size, UINT mType) { m_xmf3Position = xmf3Position; m_xmfSize = xmf2Size; m_type = mType; }
+	CBillboardVertex(XMFLOAT3 xmf3Position, XMFLOAT2 xmf2Size) { m_xmf3Position = xmf3Position; m_xmfSize = xmf2Size; }
 	~CBillboardVertex() {}
 };
 
 class CBillboardMesh : public CMesh
 {
 public:
-	CBillboardMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, void* pContext);
+	CBillboardMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, void* pContext, UINT mType = 0);
 	virtual ~CBillboardMesh();
 };

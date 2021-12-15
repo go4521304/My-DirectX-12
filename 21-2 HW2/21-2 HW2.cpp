@@ -1,8 +1,8 @@
-﻿// 21-2 HW1.cpp : 애플리케이션에 대한 진입점을 정의합니다.
+﻿// 21-2 HW2.cpp : 애플리케이션에 대한 진입점을 정의합니다.
 //
 
 #include "stdafx.h"
-#include "21-2 MID.h"
+#include "21-2 HW2.h"
 #include "GameFramework.h"
 
 #define MAX_LOADSTRING 100
@@ -27,12 +27,12 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 	HACCEL hAccelTable;
 
 	::LoadString(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
-	::LoadString(hInstance, IDC_MY212MID, szWindowClass, MAX_LOADSTRING);
+	::LoadString(hInstance, IDC_MY212HW2, szWindowClass, MAX_LOADSTRING);
 	MyRegisterClass(hInstance);
 
 	if (!InitInstance(hInstance, nCmdShow)) return(FALSE);
 
-	hAccelTable = ::LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_MY212MID));
+	hAccelTable = ::LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_MY212HW2));
 
 	while (1)
 	{
@@ -66,10 +66,10 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
 	wcex.cbClsExtra = 0;
 	wcex.cbWndExtra = 0;
 	wcex.hInstance = hInstance;
-	wcex.hIcon = ::LoadIcon(hInstance, MAKEINTRESOURCE(IDC_MY212MID));
+	wcex.hIcon = ::LoadIcon(hInstance, MAKEINTRESOURCE(IDC_MY212HW2));
 	wcex.hCursor = ::LoadCursor(NULL, IDC_ARROW);
 	wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
-	wcex.lpszMenuName = NULL;//MAKEINTRESOURCE(IDC_MY212MID);
+	wcex.lpszMenuName = NULL;//MAKEINTRESOURCE(IDC_MY212HW2);
 	wcex.lpszClassName = szWindowClass;
 	wcex.hIconSm = ::LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL));
 

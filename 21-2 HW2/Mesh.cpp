@@ -589,7 +589,7 @@ CTexturedRectMesh::~CTexturedRectMesh()
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
-CBillboardMesh::CBillboardMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, void* pContext) : CMesh(pd3dDevice, pd3dCommandList)
+CBillboardMesh::CBillboardMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, void* pContext, UINT mType) : CMesh(pd3dDevice, pd3dCommandList)
 {
 	CHeightMapTerrain* pTerrain = (CHeightMapTerrain*)pContext;
 	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_POINTLIST;
@@ -605,63 +605,62 @@ CBillboardMesh::CBillboardMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 	XMFLOAT3 xmf3Position;
 	XMFLOAT2 xmf2Size = { 20.0f, 30.0f };
 
-	// 벡터를 사용해서 새로 추가한 부분
-	std::vector<CBillboardVertex> pBillboardVertices;
-
-	for (int type = 0; type < 2; ++type)
+	if (mType == 0)
 	{
-		if (type == 0)
+		startX = 0.0f;
+		startZ = 0.0f;
+
+		xObjects = int(fTerrainWidth / (50));
+		yObjects = 1;
+		zObjects = int(fTerrainLength / (50));
+
+		fxPitch = fTerrainWidth / xObjects;
+		fzPitch = fTerrainLength / zObjects;
+
+		xmf2Size = { 20.0f, 30.0f };
+	}
+
+	else if (mType == 1)
+	{
+		startX = 0.0f;
+		startZ = 0.0f;
+
+		fxPitch = 5.0f;
+		fzPitch = 5.0f;
+
+		xObjects = int(450 / (fxPitch));
+		yObjects = 1;
+		zObjects = int(1200 / (fzPitch));
+
+		xmf2Size = { 10.0f, 10.0f };
+	}
+	nNum = (xObjects * yObjects * zObjects);
+
+	m_nStride = sizeof(CBillboardVertex);
+	m_nVertices = nNum;
+
+	CBillboardVertex* pBillboardVertices = new CBillboardVertex[nNum];
+
+	for (int i = 0, x = 0; x < xObjects; ++x)
+	{
+		for (int z = 0; z < zObjects; ++z)
 		{
-			startX = 0.0f;
-			startZ = 0.0f;
+			float fxTerrain = xmf3Position.x = x * fxPitch + startX;
+			float fyTerrain = xmf3Position.z = z * fzPitch + startZ;
 
-			xObjects = int(fTerrainWidth / (50));
-			yObjects = 1;
-			zObjects = int(fTerrainLength / (50));
-
-			fxPitch = fTerrainWidth / xObjects;
-			fzPitch = fTerrainLength / zObjects;
-
-			xmf2Size = { 20.0f, 30.0f };
-		}
-
-		else if (type == 1)
-		{
-			startX = 0.0f;
-			startZ = 0.0f;
-
-			fxPitch = 5.0f;
-			fzPitch = 5.0f;
-
-			xObjects = int(450 / (fxPitch));
-			yObjects = 1;
-			zObjects = int(1200 / (fzPitch));
-
-			xmf2Size = { 10.0f, 10.0f };
-		}
-
-		for (int i = 0, x = 0; x < xObjects; ++x)
-		{
-			for (int z = 0; z < zObjects; ++z)
-			{
-				float fxTerrain = xmf3Position.x = x * fxPitch + startX;
-				float fyTerrain = xmf3Position.z = z * fzPitch + startZ;
-
-				xmf3Position.y = pTerrain->GetHeight(fxTerrain, fyTerrain, false) + (xmf2Size.y / 2);
-				pBillboardVertices.emplace_back(xmf3Position, xmf2Size, type);
-			}
+			xmf3Position.y = pTerrain->GetHeight(fxTerrain, fyTerrain, false) + (xmf2Size.y / 2);
+			pBillboardVertices[i++] = CBillboardVertex(xmf3Position, xmf2Size);
 		}
 	}
 
-	m_nStride = sizeof(CBillboardVertex);
-	m_nVertices = pBillboardVertices.size();
-
-	m_pd3dVertexBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, pBillboardVertices.data(), m_nStride * m_nVertices,
+	m_pd3dVertexBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, pBillboardVertices, m_nStride * m_nVertices,
 		D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dVertexUploadBuffer);
 
 	m_d3dVertexBufferView.BufferLocation = m_pd3dVertexBuffer->GetGPUVirtualAddress();
 	m_d3dVertexBufferView.StrideInBytes = m_nStride;
 	m_d3dVertexBufferView.SizeInBytes = m_nStride * m_nVertices;
+
+	delete[] pBillboardVertices;
 }
 
 CBillboardMesh::~CBillboardMesh()
