@@ -289,17 +289,17 @@ void CShader::ReleaseUploadBuffers()
 {
 }
 
-void CShader::OnPrepareRender(ID3D12GraphicsCommandList *pd3dCommandList)
+void CShader::OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList, int nPipelineState)
 {
-	if (m_ppd3dPipelineStates) pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[0]);
-	pd3dCommandList->SetDescriptorHeaps(1, &m_pd3dCbvSrvDescriptorHeap);
+	if (m_pd3dCbvSrvDescriptorHeap) pd3dCommandList->SetDescriptorHeaps(1, &m_pd3dCbvSrvDescriptorHeap);
+	if (m_ppd3dPipelineStates && m_ppd3dPipelineStates[nPipelineState]) pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[nPipelineState]);
 
 	UpdateShaderVariables(pd3dCommandList);
 }
 
-void CShader::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera)
+void CShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState)
 {
-	OnPrepareRender(pd3dCommandList);
+	OnPrepareRender(pd3dCommandList, nPipelineState);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -538,7 +538,7 @@ void CObjectsShader::ReleaseUploadBuffers()
 
 void CObjectsShader::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera)
 {
-	CTexturedShader::Render(pd3dCommandList, pCamera);
+	CTexturedShader::Render(pd3dCommandList, pCamera, 0);
 
 #ifdef _WITH_BATCH_MATERIAL
 	if (m_pMaterial) m_pMaterial->UpdateShaderVariables(pd3dCommandList);
@@ -747,7 +747,7 @@ D3D12_BLEND_DESC CBillboardShader::CreateBlendState()
 
 void CBillboardShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
-	CTexturedShader::Render(pd3dCommandList, pCamera);
+	CTexturedShader::Render(pd3dCommandList, pCamera, 0);
 
 #ifdef _WITH_BATCH_MATERIAL
 	if (m_pMaterial) m_pMaterial->UpdateShaderVariables(pd3dCommandList);
@@ -897,7 +897,7 @@ D3D12_BLEND_DESC CBulletShader::CreateBlendState()
 
 void CBulletShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
-	CTexturedShader::Render(pd3dCommandList, pCamera);
+	CTexturedShader::Render(pd3dCommandList, pCamera, 0);
 
 #ifdef _WITH_BATCH_MATERIAL
 	if (m_pMaterial) m_pMaterial->UpdateShaderVariables(pd3dCommandList);
