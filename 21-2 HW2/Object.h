@@ -14,11 +14,13 @@
 #define DIR_UP						0x10
 #define DIR_DOWN					0x20
 
-#define RESOURCE_TEXTURE2D			0x01
-#define RESOURCE_TEXTURE2D_ARRAY	0x02	//[]
-#define RESOURCE_TEXTURE2DARRAY		0x03
-#define RESOURCE_TEXTURE_CUBE		0x04
-#define RESOURCE_BUFFER				0x05
+#define RESOURCE_TEXTURE1D			0x01
+#define RESOURCE_TEXTURE2D			0x02
+#define RESOURCE_TEXTURE2D_ARRAY	0x03	//[]
+#define RESOURCE_TEXTURE2DARRAY		0x04
+#define RESOURCE_TEXTURE_CUBE		0x05
+#define RESOURCE_BUFFER				0x06
+#define RESOURCE_STRUCTURED_BUFFER	0x07
 
 class CShader;
 
@@ -292,6 +294,7 @@ private:
 	BOOL						m_isExploed = FALSE;
 	float						m_lifeTime = 10.0f;
 	XMFLOAT3					m_direction;
+
 public:
 	void SetRotationAxis(XMFLOAT3 xmf3RotationAxis) { m_xmf3RotationAxis = xmf3RotationAxis; }
 	virtual void Animate(float fTimeElapsed, CCamera* pCamera, void* pContext);
@@ -315,6 +318,7 @@ public:
 
 	void ReleaseUploadBuffers();
 
+	virtual void Animate(float fTimeElapsed, CCamera* pCamera, void* pContext);
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
 
 	ID3D12CommandAllocator* m_pd3dCommandAllocator = NULL;

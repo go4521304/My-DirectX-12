@@ -28,7 +28,7 @@ CPlayer::CPlayer(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dComman
 
 	m_Bullet = new CBulletShader;
 	m_Bullet->CreateGraphicsPipelineState(pd3dDevice, pd3dGraphicsRootSignature, 0);
-	m_Bullet->BuildObjects(pd3dDevice, pd3dCommandList, pContext);
+	m_Bullet->BuildObjects(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pContext);
 }
 
 CPlayer::~CPlayer()

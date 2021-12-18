@@ -20,7 +20,7 @@ public:
 	void AddRef() { m_nReferences++; }
 	void Release() { if (--m_nReferences <= 0) delete this; }
 
-	virtual D3D12_INPUT_LAYOUT_DESC CreateInputLayout();
+	virtual  D3D12_INPUT_LAYOUT_DESC CreateInputLayout(int nPipelineState);
 	virtual D3D12_RASTERIZER_DESC CreateRasterizerState();
 	virtual D3D12_BLEND_DESC CreateBlendState();
 	virtual D3D12_DEPTH_STENCIL_DESC CreateDepthStencilState();
@@ -95,7 +95,7 @@ public:
 	CPlayerShader();
 	virtual ~CPlayerShader();
 
-	virtual D3D12_INPUT_LAYOUT_DESC CreateInputLayout();
+	virtual D3D12_INPUT_LAYOUT_DESC CreateInputLayout(int nPipelineState);
 	virtual D3D12_SHADER_BYTECODE CreateVertexShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState);
 	virtual D3D12_SHADER_BYTECODE CreatePixelShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState);
 
@@ -110,7 +110,7 @@ public:
 	CTexturedShader();
 	virtual ~CTexturedShader();
 
-	virtual D3D12_INPUT_LAYOUT_DESC CreateInputLayout();
+	virtual D3D12_INPUT_LAYOUT_DESC CreateInputLayout(int nPipelineState);
 
 	virtual void CreateGraphicsPipelineState(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature, int nPipelineState);
 
@@ -160,7 +160,7 @@ public:
 	CTerrainShader();
 	virtual ~CTerrainShader();
 
-	virtual D3D12_INPUT_LAYOUT_DESC CreateInputLayout();
+	virtual D3D12_INPUT_LAYOUT_DESC CreateInputLayout(int nPipelineState);
 	virtual D3D12_SHADER_BYTECODE CreateVertexShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState);
 	virtual D3D12_SHADER_BYTECODE CreatePixelShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState);
 
@@ -188,7 +188,7 @@ class CBillboardShader : public CObjectsShader
 public:
 	CBillboardShader();
 	virtual ~CBillboardShader();
-	virtual D3D12_INPUT_LAYOUT_DESC CreateInputLayout();
+	virtual D3D12_INPUT_LAYOUT_DESC CreateInputLayout(int nPipelineState);
 	virtual void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, void* pContext = NULL);
 	virtual void AnimateObjects(float fTimeElapsed, CCamera* pCamera);
 	virtual D3D12_BLEND_DESC CreateBlendState();
@@ -200,31 +200,13 @@ public:
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//
-class CBulletShader : public CObjectsShader
-{
-public:
-	CBulletShader();
-	virtual ~CBulletShader();
 
-	void SetBullet(XMFLOAT3 m_Position, XMFLOAT3 m_Direction);
-	virtual void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, void* pContext = NULL);
-	virtual void AnimateObjects(float fTimeElapsed, CCamera* pCamera, void* pContext);
-	virtual D3D12_BLEND_DESC CreateBlendState();
-
-	virtual D3D12_SHADER_BYTECODE CreatePixelShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState);
-
-	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState);;
-};
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-class CParticleShader : public CObjectsShader
+class CParticleShader : public CBillboardShader
 {
 public:
 	CParticleShader();
 	virtual ~CParticleShader();
-
-	virtual D3D12_PRIMITIVE_TOPOLOGY_TYPE GetPrimitiveTopologyType(int nPipelineState);
+	
 	virtual UINT GetNumRenderTargets(int nPipelineState);
 	virtual DXGI_FORMAT GetRTVFormat(int nPipelineState, int nRenderTarget);
 	virtual DXGI_FORMAT GetDSVFormat(int nPipelineState);
@@ -235,8 +217,29 @@ public:
 
 	virtual D3D12_INPUT_LAYOUT_DESC CreateInputLayout(int nPipelineState);
 	virtual D3D12_STREAM_OUTPUT_DESC CreateStreamOuputState(int nPipelineState);
-	virtual D3D12_BLEND_DESC CreateBlendState(int nPipelineState);
-	virtual D3D12_DEPTH_STENCIL_DESC CreateDepthStencilState(int nPipelineState);
+	virtual D3D12_BLEND_DESC CreateBlendState();
+	virtual D3D12_DEPTH_STENCIL_DESC CreateDepthStencilState();
 
 	virtual void CreateGraphicsPipelineState(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature, int nPipelineState);
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+class CBulletShader : public CObjectsShader
+{
+public:
+	CBulletShader();
+	virtual ~CBulletShader();
+
+	void SetBullet(XMFLOAT3 m_Position, XMFLOAT3 m_Direction);
+	virtual void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext = NULL);
+	virtual void AnimateObjects(float fTimeElapsed, CCamera* pCamera, void* pContext);
+	virtual D3D12_BLEND_DESC CreateBlendState();
+
+	virtual D3D12_SHADER_BYTECODE CreatePixelShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState);
+
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState);
+
+protected:
+	CParticleObject**	m_ppParticleObj;
 };
