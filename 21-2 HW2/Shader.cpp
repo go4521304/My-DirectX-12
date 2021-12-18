@@ -536,7 +536,7 @@ void CObjectsShader::ReleaseUploadBuffers()
 #endif
 }
 
-void CObjectsShader::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera)
+void CObjectsShader::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera, int nPipelineState)
 {
 	CTexturedShader::Render(pd3dCommandList, pCamera, 0);
 
@@ -745,7 +745,7 @@ D3D12_BLEND_DESC CBillboardShader::CreateBlendState()
 	return(d3dBlendDesc);
 }
 
-void CBillboardShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
+void CBillboardShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState)
 {
 	CTexturedShader::Render(pd3dCommandList, pCamera, 0);
 
@@ -895,7 +895,7 @@ D3D12_BLEND_DESC CBulletShader::CreateBlendState()
 	return(d3dBlendDesc);
 }
 
-void CBulletShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
+void CBulletShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState)
 {
 	CTexturedShader::Render(pd3dCommandList, pCamera, 0);
 

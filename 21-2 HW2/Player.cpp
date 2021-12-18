@@ -250,7 +250,7 @@ void CPlayer::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamer
 {
 	DWORD nCameraMode = (pCamera) ? pCamera->GetMode() : 0x00;
 	if (nCameraMode == THIRD_PERSON_CAMERA) CGameObject::Render(pd3dCommandList, pCamera);
-	m_Bullet->Render(pd3dCommandList, pCamera);
+	m_Bullet->Render(pd3dCommandList, pCamera, 0);
 }
 
 void CPlayer::ShootBullet()
