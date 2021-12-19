@@ -716,26 +716,56 @@ void CBulletObject::SetActive(XMFLOAT3 direction)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-CParticleObject::CParticleObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, XMFLOAT3 xmf3Position, XMFLOAT3 xmf3Velocity, XMFLOAT2 xmf2Size, float fLifetime, UINT nMaxParticles) : CGameObject()
+CParticleObject::CParticleObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, XMFLOAT3 xmf3Position, XMFLOAT3 xmf3Velocity, XMFLOAT3 xmf3Acceleration, XMFLOAT3 xmf3Color, XMFLOAT2 xmf2Size, float fLifetime, UINT nMaxParticles) : CGameObject()
 {
-	CParticleMesh* pMesh = new CParticleMesh(pd3dDevice, pd3dCommandList, xmf3Position, xmf3Velocity, xmf2Size, fLifetime, nMaxParticles);
+	CParticleMesh* pMesh = new CParticleMesh(pd3dDevice, pd3dCommandList, xmf3Position, xmf3Velocity, xmf3Acceleration, xmf3Color, xmf2Size, fLifetime, nMaxParticles);
 	SetMesh(0, pMesh);
 
 	CTexture* pParticleTexture = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
-
-	pParticleTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Image/dust.dds", RESOURCE_TEXTURE2D, 0);
+#ifdef _WITH_BALLOON_TEXTURE
+	pParticleTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Image/Balloon.dds", RESOURCE_TEXTURE2D, 0);
+#endif
+#ifdef _WITH_ROUND_SOFTPARTICLE_TEXTURE
+	pParticleTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Image/RoundSoftParticle.dds", RESOURCE_TEXTURE2D, 0);
+#endif
 
 	CMaterial* pMaterial = new CMaterial();
 	pMaterial->SetTexture(pParticleTexture);
 
+	/*
+		XMFLOAT4 *pxmf4RandomValues = new XMFLOAT4[1000];
+		random_device rd;   // non-deterministic generator
+		mt19937 gen(rd());  // to seed mersenne twister.
+		uniform_real_distribution<> vdist(-1.0, +1.0);
+		uniform_real_distribution<> cdist(0.0, +1.0);
+		for (int i = 0; i < 1000; i++) pxmf4RandomValues[i] = XMFLOAT4(float(vdist(gen)), float(vdist(gen)), float(vdist(gen)), float(cdist(gen)));
+	*/
+	srand((unsigned)time(NULL));
+
+	XMFLOAT4* pxmf4RandomValues = new XMFLOAT4[1000];
+	for (int i = 0; i < 1000; i++) pxmf4RandomValues[i] = XMFLOAT4(RandomValue(-1.0f, 1.0f), RandomValue(-1.0f, 1.0f), RandomValue(-1.0f, 1.0f), RandomValue(0.0f, 1.0f));
+
+	//	float *pxmf4RandomValues = new float[4000];
+	//	for (int i = 0; i < 4000; i += 4) { pxmf4RandomValues[i] = RandomValue(-1.0f, 1.0f); pxmf4RandomValues[i+1] = RandomValue(-1.0f, 1.0f); pxmf4RandomValues[i+2] = RandomValue(-1.0f, 1.0f); pxmf4RandomValues[i+3] = RandomValue(0.0f, 1.0f); }
+	//	pxmf4RandomValues[4] = 0.85f;
+	//	pxmf4RandomValues[400] = 1.0f;
+	//	pxmf4RandomValues[800] = 0.0f;
+
+	//	m_pRandowmValueTexture = new CTexture(1, RESOURCE_STRUCTURED_BUFFER, 0, 1);
+	//	m_pRandowmValueTexture = new CTexture(1, RESOURCE_TEXTURE1D, 0, 1);
+	m_pRandowmValueTexture = new CTexture(1, RESOURCE_BUFFER, 0, 1);
+	m_pRandowmValueTexture->CreateBuffer(pd3dDevice, pd3dCommandList, pxmf4RandomValues, 1000, sizeof(XMFLOAT4), DXGI_FORMAT_R32G32B32A32_FLOAT, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_GENERIC_READ, 0);
+
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
 	CParticleShader* pShader = new CParticleShader();
-	pShader->CreateGraphicsPipelineState(pd3dDevice, pd3dGraphicsRootSignature, 0);
+	pShader->CreateGraphicsPipelineState(pd3dDevice, pd3dGraphicsRootSignature, 0);	// ÀÌ·²²¨¸é ¿Ö...?
+	//pShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
 	pShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 1, 2);
 	pShader->CreateConstantBufferViews(pd3dDevice, 1, m_pd3dcbGameObject, ((sizeof(CB_GAMEOBJECT_INFO) + 255) & ~255));
 
 	pShader->CreateShaderResourceViews(pd3dDevice, pParticleTexture, 0, 11);
+	pShader->CreateShaderResourceViews(pd3dDevice, m_pRandowmValueTexture, 0, 12);
 
 	SetCbvGPUDescriptorHandle(pShader->GetGPUCbvDescriptorStartHandle());
 
@@ -753,6 +783,8 @@ CParticleObject::CParticleObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 
 CParticleObject::~CParticleObject()
 {
+	if (m_pRandowmValueTexture) m_pRandowmValueTexture->Release();
+
 	if (m_pd3dCommandAllocator) m_pd3dCommandAllocator->Release();
 	if (m_pd3dCommandList) m_pd3dCommandList->Release();
 
@@ -763,6 +795,8 @@ CParticleObject::~CParticleObject()
 
 void CParticleObject::ReleaseUploadBuffers()
 {
+	if (m_pRandowmValueTexture) m_pRandowmValueTexture->ReleaseUploadBuffers();
+
 	CGameObject::ReleaseUploadBuffers();
 }
 
@@ -770,6 +804,7 @@ void CParticleObject::Animate(float fTimeElapsed, CCamera* pCamera, void* pConte
 {
 	
 }
+
 
 void CParticleObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
@@ -779,6 +814,8 @@ void CParticleObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera
 	{
 		if (m_pMaterial->m_pShader) m_pMaterial->m_pShader->OnPrepareRender(pd3dCommandList, 0);
 		if (m_pMaterial->m_pTexture) m_pMaterial->m_pTexture->UpdateShaderVariables(pd3dCommandList);
+
+		if (m_pRandowmValueTexture) m_pRandowmValueTexture->UpdateShaderVariables(pd3dCommandList);
 	}
 
 	UpdateShaderVariables(pd3dCommandList);
