@@ -412,8 +412,7 @@ void GSParticleStreamOutput(point VS_PARTICLE_INPUT input[1], inout PointStream<
 //			particle.age.x = 0.0f;
 
 			output.Append(particle);
-
-			//		float4 f4Random = gRandomBuffer.Load(uint(gfCurrentTime * 1000.0f) % 1000);
+			
 			float4 f4Random = gRandomBuffer.Load(int(fmod(gcbFrameInfo.m_fCurrentTime - floor(gcbFrameInfo.m_fCurrentTime) * 1000.0f, 1000.0f)));
 
 			float3 pf3Positions[8];
@@ -429,7 +428,6 @@ void GSParticleStreamOutput(point VS_PARTICLE_INPUT input[1], inout PointStream<
 				particle.velocity = float3(0.0f, particle.size.x * particle.age.y * 4.0f, 0.0f) * 2.0f;
 				particle.acceleration = float3(0.0f, 250.125f, 0.0f) * abs(f4Random.x);
 				particle.age.y = (particle.type == PARTICLE_TYPE_EMITTER) ? 0.25f : 1.5f + (abs(f4Random.w) * 0.75f * abs(j - 4));
-				//particle.age.y = 100000.0f;
 
 				output.Append(particle);
 			}
@@ -464,8 +462,8 @@ static float2 gf2QuadUVs[4] = { float2(0.0f,1.0f), float2(0.0f,0.0f), float2(1.0
 void GSParticleDraw(point VS_PARTICLE_INPUT input[1], inout TriangleStream<GS_PARTICLE_OUTPUT> outputStream)
 {
 	float4 pVertices[4];
-	GetBillboardCorners(input[0].position, input[0].size * 0.5f, pVertices);
-	//GetBillboardCorners(mul(float4(input[0].position, 1.0f), gmtxWorld).xyz, input[0].size * 0.5f, pVertices);
+	//GetBillboardCorners(input[0].position, input[0].size * 0.5f, pVertices);
+	GetBillboardCorners(mul(float4(input[0].position, 1.0f), gcbGameObjectInfo.mtxWorld).xyz, input[0].size * 0.5f, pVertices);
 
 	GS_PARTICLE_OUTPUT output = (GS_PARTICLE_OUTPUT)0;
 	output.color = input[0].color;
@@ -473,8 +471,7 @@ void GSParticleDraw(point VS_PARTICLE_INPUT input[1], inout TriangleStream<GS_PA
 	output.type = input[0].type;
 	for (int i = 0; i < 4; i++)
 	{
-		//output.position = mul(mul(pVertices[i], gmtxView), gmtxProjection);
-		output.position = (pVertices[i].xyz, 1.0);
+		output.position = mul(mul(pVertices[i], gcbCameraInfo.mtxView), gcbCameraInfo.mtxProjection);
 		output.uv = gf2QuadUVs[i];
 
 		outputStream.Append(output);
@@ -484,17 +481,6 @@ void GSParticleDraw(point VS_PARTICLE_INPUT input[1], inout TriangleStream<GS_PA
 float4 PSParticleDraw(GS_PARTICLE_OUTPUT input) : SV_TARGET
 {
 	float4 cColor = gtxtParticleTexture.Sample(gWrapSamplerState, input.uv);
-	if (input.type == PARTICLE_TYPE_FLARE)
-	{
-//		cColor.a *= saturate(0.10f + (1.0f - (input.age.x / input.age.y)));
-		//	cColor.rgb *= input.color * (input.age.x / input.age.y);
-		//	cColor.rgb = GetParticleColor(gfElapsedTime, gfElapsedTime);
-		cColor.rgb *= GetParticleColor(input.age.x, input.age.y);
-//		cColor.rgb = saturate(1.0f - input.age.x);
-		//	cColor.rgb = abs(gRandomBuffer.Load(int(fmod(gfCurrentTime, 1000.0f))).rgb);
-		//	cColor.rgb = 1.0f;
-		//	cColor.b = (input.age.x / input.age.y);
-	}
-
+	clip(cColor.a - 0.15f);
 	return(cColor); 
 }
