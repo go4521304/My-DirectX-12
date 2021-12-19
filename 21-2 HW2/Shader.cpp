@@ -868,7 +868,7 @@ void CBulletShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 		m_ppObjects[i] = pBulletObject;
 
 		/* 파티클 오브젝트 생성 */
-		m_ppParticleObj[i] = new CParticleObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(8.0f, 8.0f), 5.0f, MAX_PARTICLES);
+		m_ppParticleObj[i] = new CParticleObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT2(8.0f, 8.0f), 5.0f, MAX_PARTICLES);
 	}
 }
 
@@ -950,6 +950,25 @@ void CBulletShader::SetBullet(XMFLOAT3 m_Position, XMFLOAT3 m_Direction)
 	}
 }
 
+void CBulletShader::ReleaseShaderVariables()
+{
+	if (m_pd3dCbvSrvDescriptorHeap) m_pd3dCbvSrvDescriptorHeap->Release();
+}
+
+void CBulletShader::ReleaseUploadBuffers()
+{
+	if (m_ppObjects)
+	{
+		for (int j = 0; j < m_nObjects; j++)
+		{
+			if (m_ppObjects[j]) delete m_ppObjects[j];
+			if (m_ppParticleObj[j]) delete m_ppParticleObj[j];
+		}
+
+		delete[] m_ppObjects;
+	}
+}
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///
 CParticleShader::CParticleShader()
@@ -1003,16 +1022,14 @@ D3D12_SHADER_BYTECODE CParticleShader::CreatePixelShader(ID3DBlob** ppd3dShaderB
 
 D3D12_INPUT_LAYOUT_DESC CParticleShader::CreateInputLayout(int nPipelineState)
 {
-	UINT nInputElementDescs = 7;
+	UINT nInputElementDescs = 5;
 	D3D12_INPUT_ELEMENT_DESC* pd3dInputElementDescs = new D3D12_INPUT_ELEMENT_DESC[nInputElementDescs];
 
 	pd3dInputElementDescs[0] = { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
-	pd3dInputElementDescs[1] = { "COLOR", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
-	pd3dInputElementDescs[2] = { "VELOCITY", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 24, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
-	pd3dInputElementDescs[3] = { "ACCELERATION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 36, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
-	pd3dInputElementDescs[4] = { "SIZE", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 48, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
-	pd3dInputElementDescs[5] = { "AGELIFETIME", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 56, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
-	pd3dInputElementDescs[6] = { "PARTICLETYPE", 0, DXGI_FORMAT_R32_UINT, 0, 64, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+	pd3dInputElementDescs[1] = { "VELOCITY", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+	pd3dInputElementDescs[2] = { "SIZE", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 20, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+	pd3dInputElementDescs[3] = { "LIFETIME", 0, DXGI_FORMAT_R32_FLOAT, 0, 24, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+	pd3dInputElementDescs[4] = { "PARTICLETYPE", 0, DXGI_FORMAT_R32_UINT, 0, 28, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
 
 	D3D12_INPUT_LAYOUT_DESC d3dInputLayoutDesc;
 	d3dInputLayoutDesc.pInputElementDescs = pd3dInputElementDescs;
@@ -1028,15 +1045,13 @@ D3D12_STREAM_OUTPUT_DESC CParticleShader::CreateStreamOuputState(int nPipelineSt
 
 	if (nPipelineState == 0)
 	{
-		UINT nStreamOutputDecls = 7;
+		UINT nStreamOutputDecls = 5;
 		D3D12_SO_DECLARATION_ENTRY* pd3dStreamOutputDecls = new D3D12_SO_DECLARATION_ENTRY[nStreamOutputDecls];
-		pd3dStreamOutputDecls[0] = { 0, "POSITION", 0, 0, 3, 0 };
-		pd3dStreamOutputDecls[1] = { 0, "COLOR", 0, 0, 3, 0 };
+		pd3dStreamOutputDecls[1] = { 0, "POSITION", 0, 0, 3, 0 };
 		pd3dStreamOutputDecls[2] = { 0, "VELOCITY", 0, 0, 3, 0 };
-		pd3dStreamOutputDecls[3] = { 0, "ACCELERATION", 0, 0, 3, 0 };
-		pd3dStreamOutputDecls[4] = { 0, "SIZE", 0, 0, 2, 0 };
-		pd3dStreamOutputDecls[5] = { 0, "AGELIFETIME", 0, 0, 2, 0 };
-		pd3dStreamOutputDecls[6] = { 0, "PARTICLETYPE", 0, 0, 1, 0 };
+		pd3dStreamOutputDecls[3] = { 0, "SIZE", 0, 0, 2, 0 };
+		pd3dStreamOutputDecls[4] = { 0, "LIFETIME", 0, 0, 1, 0 };
+		pd3dStreamOutputDecls[5] = { 0, "PARTICLETYPE", 0, 0, 1, 0 };
 
 		UINT* pBufferStrides = new UINT[1];
 		pBufferStrides[0] = sizeof(CParticleVertex);

@@ -157,24 +157,9 @@ VS_TEXTURED_OUTPUT VSTextured(VS_TEXTURED_INPUT input)
 
 float4 PSTextured(VS_TEXTURED_OUTPUT input, uint nPrimitiveID : SV_PrimitiveID) : SV_TARGET
 {
-	/*
-		float4 cColor;
-		if (nPrimitiveID < 2)
-			cColor = gtxtTextures[0].Sample(gWrapSamplerState, input.uv);
-		else if (nPrimitiveID < 4)
-			cColor = gtxtTextures[1].Sample(gWrapSamplerState, input.uv);
-		else if (nPrimitiveID < 6)
-			cColor = gtxtTextures[2].Sample(gWrapSamplerState, input.uv);
-		else if (nPrimitiveID < 8)
-			cColor = gtxtTextures[3].Sample(gWrapSamplerState, input.uv);
-		else if (nPrimitiveID < 10)
-			cColor = gtxtTextures[4].Sample(gWrapSamplerState, input.uv);
-		else
-			cColor = gtxtTextures[5].Sample(gWrapSamplerState, input.uv);
-	*/
-		float4 cColor = gtxtTextures[NonUniformResourceIndex(nPrimitiveID / 2)].Sample(gWrapSamplerState, input.uv);
+	float4 cColor = gtxtTextures[NonUniformResourceIndex(nPrimitiveID / 2)].Sample(gWrapSamplerState, input.uv);
 
-		return(cColor);
+	return(cColor);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -336,11 +321,9 @@ float4 PSBullet(VS_TEXTURED_OUTPUT input) : SV_TARGET
 struct VS_PARTICLE_INPUT
 {
 	float3 position : POSITION;
-	float3 color : COLOR;
 	float3 velocity : VELOCITY;
-	float3 acceleration : ACCELERATION;
 	float2 size : SIZE;
-	float2 age : AGELIFETIME; //(Age, Lifetime)
+	float age : LIFETIME;
 	uint type : PARTICLETYPE;
 };
 
@@ -350,7 +333,6 @@ VS_PARTICLE_INPUT VSParticleStreamOutput(VS_PARTICLE_INPUT input)
 }
 
 Texture2D gtxtParticleTexture : register(t32);
-Buffer<float4> gRandomBuffer : register(t33);
 
 float3 GetParticleColor(float fAge, float fLifetime)
 {
@@ -452,7 +434,7 @@ struct GS_PARTICLE_OUTPUT
 	float4 position : SV_Position;
 	float3 color : COLOR;
 	float2 uv : TEXCOORD;
-	float2 age : AGELIFETIME; //(Age, Lifetime)
+	float age : LIFETIME;
 	uint type : PARTICLETYPE;
 };
 

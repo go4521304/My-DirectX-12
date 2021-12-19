@@ -669,13 +669,13 @@ CBillboardMesh::~CBillboardMesh()
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
-CParticleMesh::CParticleMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, XMFLOAT3 xmf3Position, XMFLOAT3 xmf3Velocity, XMFLOAT3 xmf3Acceleration, XMFLOAT3 xmf3Color, XMFLOAT2 xmf2Size, float fLifetime, UINT nMaxParticles) : CMesh(pd3dDevice, pd3dCommandList)
+CParticleMesh::CParticleMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, XMFLOAT3 xmf3Position, XMFLOAT3 xmf3Velocity, XMFLOAT2 xmf2Size, float fLifetime, UINT nMaxParticles) : CMesh(pd3dDevice, pd3dCommandList)
 {
-	CreateVertexBuffer(pd3dDevice, pd3dCommandList, xmf3Position, xmf3Velocity, xmf3Acceleration, xmf3Color, xmf2Size, fLifetime);
+	CreateVertexBuffer(pd3dDevice, pd3dCommandList, xmf3Position, xmf3Velocity, xmf2Size, fLifetime);
 	CreateStreamOutputBuffer(pd3dDevice, pd3dCommandList, nMaxParticles);
 }
 
-void CParticleMesh::CreateVertexBuffer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, XMFLOAT3 xmf3Position, XMFLOAT3 xmf3Velocity, XMFLOAT3 xmf3Acceleration, XMFLOAT3 xmf3Color, XMFLOAT2 xmf2Size, float fLifetime)
+void CParticleMesh::CreateVertexBuffer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, XMFLOAT3 xmf3Position, XMFLOAT3 xmf3Velocity, XMFLOAT2 xmf2Size, float fLifetime)
 {
 	m_nVertices = 1;
 	m_nStride = sizeof(CParticleVertex);
@@ -685,10 +685,8 @@ void CParticleMesh::CreateVertexBuffer(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 
 	pVertices[0].m_xmf3Position = xmf3Position;
 	pVertices[0].m_xmf3Velocity = xmf3Velocity;
-	pVertices[0].m_xmf3Acceleration = xmf3Acceleration;
-	pVertices[0].m_xmf3Color = xmf3Color;
 	pVertices[0].m_xmf2Size = xmf2Size;
-	pVertices[0].m_xmf2AgeLifetime = XMFLOAT2(0.0f, fLifetime);
+	pVertices[0].m_xmfLifetime = fLifetime;
 	pVertices[0].m_nType = 0; //PARTICLE_TYPE_EMITTER
 
 	m_pd3dVertexBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, pVertices, m_nStride * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dVertexUploadBuffer);

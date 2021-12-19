@@ -240,6 +240,9 @@ public:
 
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState);
 
+	virtual void ReleaseShaderVariables();
+	virtual void ReleaseUploadBuffers();
+
 protected:
 	CParticleObject**	m_ppParticleObj;
 };

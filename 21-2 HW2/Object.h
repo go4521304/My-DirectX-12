@@ -323,10 +323,8 @@ public:
 class CParticleObject : public CGameObject
 {
 public:
-	CParticleObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, XMFLOAT3 xmf3Position, XMFLOAT3 xmf3Velocity, XMFLOAT3 xmf3Acceleration, XMFLOAT3 xmf3Color, XMFLOAT2 xmf2Size, float fLifetime, UINT nMaxParticles);
+	CParticleObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, XMFLOAT3 xmf3Position, XMFLOAT3 xmf3Velocity, XMFLOAT2 xmf2Size, float fLifetime, UINT nMaxParticles);
 	virtual ~CParticleObject();
-
-	CTexture* m_pRandowmValueTexture = NULL;
 
 	void ReleaseUploadBuffers();
 

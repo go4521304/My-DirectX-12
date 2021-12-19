@@ -58,9 +58,6 @@ using Microsoft::WRL::ComPtr;
 //#define _WITH_CB_GAMEOBJECT_ROOT_DESCRIPTOR
 #define _WITH_CB_WORLD_MATRIX_DESCRIPTOR_TABLE
 
-//#define _WITH_BALLOON_TEXTURE
-#define _WITH_ROUND_SOFTPARTICLE_TEXTURE
-
 extern int gnCurrentParticles;
 
 #pragma comment(lib, "d3dcompiler.lib")
