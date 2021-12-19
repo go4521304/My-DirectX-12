@@ -933,7 +933,6 @@ void CBulletShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* 
 		if (m_ppParticleObj[j] && m_ppObjects[j] -> CheckActive() == TRUE && m_ppObjects[j]->GetTextureType() != 0)
 		{
 			m_ppParticleObj[j]->Render(pd3dCommandList, pCamera);
-			//m_ppParticleObj[j]->SetPosition(m_ppObjects[j]->GetPosition());
 		}
 	}
 }

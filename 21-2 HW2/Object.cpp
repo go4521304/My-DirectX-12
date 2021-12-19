@@ -758,8 +758,7 @@ CParticleObject::CParticleObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
 	CParticleShader* pShader = new CParticleShader();
-	pShader->CreateGraphicsPipelineState(pd3dDevice, pd3dGraphicsRootSignature, 0);	// ÀÌ·²²¨¸é ¿Ö...?
-	//pShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
+	pShader->CreateGraphicsPipelineState(pd3dDevice, pd3dGraphicsRootSignature, 0);
 	pShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 1, 2);
 	pShader->CreateConstantBufferViews(pd3dDevice, 1, m_pd3dcbGameObject, ((sizeof(CB_GAMEOBJECT_INFO) + 255) & ~255));
 
@@ -803,7 +802,6 @@ void CParticleObject::Animate(float fTimeElapsed, CCamera* pCamera, void* pConte
 {
 	
 }
-
 
 void CParticleObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
