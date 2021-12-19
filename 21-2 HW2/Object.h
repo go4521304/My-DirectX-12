@@ -285,10 +285,6 @@ public:
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-///
-const float Bullet_Speed = 1000.0f;
-const float Bullet_LifeTime = 5.0f;
-
 class CBulletObject : public CGameObject
 {
 private:
@@ -303,14 +299,6 @@ public:
 	void SetRotationAxis(XMFLOAT3 xmf3RotationAxis) { m_xmf3RotationAxis = xmf3RotationAxis; }
 	virtual void Animate(float fTimeElapsed, CCamera* pCamera, void* pContext);
 	virtual void SetLookAt(XMFLOAT3& xmf3Target);
-
-	bool CheckExploed()
-	{
-		if (m_isExploed && m_lifeTime > Bullet_LifeTime - 1.0f)
-			return true;
-		else 
-			return false;
-	}
 
 	virtual void SetTextureType(UINT type) { m_textureType = type; }
 	virtual UINT GetTextureType() { return m_textureType; }

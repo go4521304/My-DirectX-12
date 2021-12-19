@@ -642,7 +642,8 @@ void CSkyBox::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamer
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
+const float Bullet_Speed = 1000.0f;
+const float Bullet_LifeTime = 5.0f;
 
 void CBulletObject::Animate(float fTimeElapsed, CCamera* pCamera, void* pContext)
 {
@@ -781,7 +782,6 @@ void CParticleObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera
 	}
 
 	UpdateShaderVariables(pd3dCommandList);
-	pd3dCommandList->SetGraphicsRootDescriptorTable(2, m_d3dCbvGPUDescriptorHandle);
 
 	for (int i = 0; i < m_nMeshes; i++) if (m_ppMeshes[i]) m_ppMeshes[i]->PreRender(pd3dCommandList, 0); //Stream Output
 	for (int i = 0; i < m_nMeshes; i++) if (m_ppMeshes[i]) m_ppMeshes[i]->Render(pd3dCommandList, 0); //Stream Output

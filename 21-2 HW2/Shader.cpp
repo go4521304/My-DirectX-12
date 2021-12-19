@@ -877,8 +877,6 @@ void CBulletShader::AnimateObjects(float fTimeElapsed, CCamera* pCamera, void* p
 	for (int j = 0; j < m_nObjects; j++)
 	{
 		m_ppObjects[j]->Animate(fTimeElapsed, pCamera, pContext);
-		if (((CBulletObject*)m_ppObjects[j])->CheckExploed())
-			m_ppParticleObj[j]->SetPosition(m_ppObjects[j]->GetPosition());
 	}
 }
 
