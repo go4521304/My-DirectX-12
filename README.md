@@ -1,4 +1,4 @@
-## 2021학년도 2학기 3D게임프로그래밍 수업에서 진행한 프로젝트 & 개인 연습 프로젝트
+## 2021학년도 2학기 3D게임프로그래밍 & 개인 연습 프로젝트
 
 # <div align=center> ![header](https://capsule-render.vercel.app/api?type=soft&color=auto&height=120&section=header&text=Direct3D12%20Study&fontSize=72)</div>
 ### :book: Study
