@@ -6,6 +6,7 @@
 
 #include "DeviceResources.h"
 #include "StepTimer.h"
+#include "Scene.h"
 
 
 // A basic game implementation that creates a D3D12 device and
@@ -60,6 +61,10 @@ private:
 
     // Rendering loop timer.
     DX::StepTimer                               m_timer;
+
+
+    // My Class
+    std::unique_ptr<Scene>                      m_scene;
 
     // If using the DirectX Tool Kit for DX12, uncomment this line:
     // std::unique_ptr<DirectX::GraphicsMemory> m_graphicsMemory;

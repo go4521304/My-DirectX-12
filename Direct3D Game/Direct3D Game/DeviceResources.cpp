@@ -55,7 +55,7 @@ DeviceResources::DeviceResources(
         m_backBufferCount(backBufferCount),
         m_d3dMinFeatureLevel(minFeatureLevel),
         m_window(nullptr),
-        m_d3dFeatureLevel(D3D_FEATURE_LEVEL_11_0),
+        m_d3dFeatureLevel(D3D_FEATURE_LEVEL_12_2),
         m_dxgiFactoryFlags(0),
         m_outputSize{0, 0, 1, 1},
         m_colorSpace(DXGI_COLOR_SPACE_RGB_FULL_G22_NONE_P709),

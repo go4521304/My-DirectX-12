@@ -45,6 +45,8 @@ void Game::Initialize(HWND window, int width, int height)
     m_timer.SetFixedTimeStep(true);
     m_timer.SetTargetElapsedSeconds(1.0 / 60);
     */
+
+    m_scene->LoadAssets(m_deviceResources->GetD3DDevice());
 }
 
 #pragma region Frame Update
@@ -91,6 +93,8 @@ void Game::Render()
     PIXBeginEvent(commandList, PIX_COLOR_DEFAULT, L"Render");
 
     // TODO: Add your rendering code here.
+    m_scene->Render(commandList);
+
 
     PIXEndEvent(commandList);
 
