@@ -359,6 +359,8 @@ void Sample3DSceneRenderer::Update(DX::StepTimer const& timer)
 			m_angle += static_cast<float>(timer.GetElapsedSeconds()) * m_radiansPerSecond;
 
 			Rotate(m_angle);
+
+			//Translate(0, 0, 0);
 		}
 
 		// 상수 버퍼 리소스를 업데이트합니다.
@@ -410,7 +412,9 @@ void Sample3DSceneRenderer::Rotate(float radians)
 
 void DX12::Sample3DSceneRenderer::Translate(float x, float y, float z)
 {
-
+	XMMATRIX tmpMat = XMLoadFloat4x4(&m_constantBufferData.model);
+	tmpMat = tmpMat * XMMatrixTranslation(x, y, z);
+	XMStoreFloat4x4(&m_constantBufferData.model, XMMatrixTranspose(tmpMat));
 }
 
 void Sample3DSceneRenderer::StartTracking()
