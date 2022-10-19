@@ -3,6 +3,7 @@
 #include "Common\StepTimer.h"
 #include "Common\DeviceResources.h"
 #include "Content\Sample3DSceneRenderer.h"
+#include "Controller.h"
 
 // 화면에서 Direct3D 콘텐츠를 렌더링합니다.
 namespace DX12
@@ -21,6 +22,9 @@ namespace DX12
 		void OnDeviceRemoved();
 
 	private:
+		// Controller
+		Controller ^m_controller;
+
 		// TODO: 사용자 콘텐츠 렌더러로 대체합니다.
 		std::unique_ptr<Sample3DSceneRenderer> m_sceneRenderer;
 

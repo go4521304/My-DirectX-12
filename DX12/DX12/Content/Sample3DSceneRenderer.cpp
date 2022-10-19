@@ -408,6 +408,11 @@ void Sample3DSceneRenderer::Rotate(float radians)
 	XMStoreFloat4x4(&m_constantBufferData.model, XMMatrixTranspose(XMMatrixRotationY(radians)));
 }
 
+void DX12::Sample3DSceneRenderer::Translate(float x, float y, float z)
+{
+
+}
+
 void Sample3DSceneRenderer::StartTracking()
 {
 	m_tracking = true;

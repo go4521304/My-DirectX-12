@@ -26,6 +26,7 @@ namespace DX12
 	private:
 		void LoadState();
 		void Rotate(float radians);
+		void Translate(float x, float y, float z);
 
 	private:
 		// 상수 버퍼는 정렬된 256바이트여야 합니다.

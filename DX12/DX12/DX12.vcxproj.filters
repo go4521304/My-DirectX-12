@@ -63,4 +63,19 @@
       <Filter>자산</Filter>
     </Image>
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="App.cpp" />
+    <ClCompile Include="DX12Main.cpp" />
+    <ClCompile Include="pch.cpp" />
+    <ClCompile Include="Controller.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="App.h" />
+    <ClInclude Include="DX12Main.h" />
+    <ClInclude Include="pch.h" />
+    <ClInclude Include="Controller.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <AppxManifest Include="Package.appxmanifest" />
+  </ItemGroup>
 </Project>

@@ -18,6 +18,8 @@ DX12Main::DX12Main()
 	m_timer.SetFixedTimeStep(true);
 	m_timer.SetTargetElapsedSeconds(1.0 / 60);
 	*/
+
+	m_controller = ref new Controller(Windows::UI::Core::CoreWindow::GetForCurrentThread());
 }
 
 // 렌더러를 만들고 초기화합니다.
@@ -35,6 +37,8 @@ void DX12Main::Update()
 	// 장면 개체를 업데이트합니다.
 	m_timer.Tick([&]()
 	{
+		m_controller->Update();
+
 		// TODO: 이 항목을 앱 콘텐츠 업데이트 함수로 대체합니다.
 		m_sceneRenderer->Update(m_timer);
 	});
