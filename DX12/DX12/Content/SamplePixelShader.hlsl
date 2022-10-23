@@ -1,3 +1,11 @@
+cbuffer ModelViewProjectionConstantBuffer : register(b0)
+{
+	matrix model;
+	matrix view;
+	matrix projection;
+};
+
+
 struct PixelShaderInput
 {
 	float4 pos : SV_POSITION;
@@ -6,5 +14,8 @@ struct PixelShaderInput
 
 float4 main(PixelShaderInput input) : SV_TARGET
 {
-	return float4(input.color, 1.0f);
+	float3 color = {view._m00, view._m01, view._m02};
+	
+
+	return float4(color, 1.0f);
 }
