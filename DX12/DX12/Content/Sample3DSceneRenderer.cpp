@@ -175,23 +175,23 @@ void Sample3DSceneRenderer::CreateDeviceDependentResources()
 		// 구성함을 의미합니다.
 		unsigned short cubeIndices[] =
 		{
-			0, 2, 1, // -x
-			1, 2, 3,
+			0, 1, 2, // -x
+			1, 3, 2,
 
-			4, 5, 6, // +x
-			5, 7, 6,
+			4, 6, 5, // +x
+			5, 6, 7,
 
-			0, 1, 5, // -y
-			0, 5, 4,
+			0, 5, 1, // -y
+			0, 4, 5,
 
-			2, 6, 7, // +y
-			2, 7, 3,
+			2, 7, 6, // +y
+			2, 3, 7,
 
-			0, 4, 6, // -z
-			0, 6, 2,
+			0, 6, 4, // -z
+			0, 2, 6,
 
-			1, 3, 7, // +z
-			1, 7, 5,
+			1, 7, 3, // +z
+			1, 5, 7,
 		};
 
 		const UINT indexBufferSize = sizeof(cubeIndices);
@@ -324,8 +324,8 @@ void Sample3DSceneRenderer::CreateWindowSizeDependentResources()
 	// 스왑 체인 렌더링 대상에 대한 모든 그리기 호출 시 필요합니다. 다른 대상에 대한 그리기 호출의 경우
 	// 이 변환을 적용해서는 안 됩니다.
 
-	// 이 샘플에서는 행 중심 매트릭스를 사용하는 오른손 좌표계를 이용합니다.
-	XMMATRIX perspectiveMatrix = XMMatrixPerspectiveFovRH(
+	// 이 샘플에서는 행 중심 매트릭스를 사용하는 왼손 좌표계를 이용합니다.
+	XMMATRIX perspectiveMatrix = XMMatrixPerspectiveFovLH(
 		fovAngleY,
 		aspectRatio,
 		0.01f,
@@ -345,7 +345,7 @@ void Sample3DSceneRenderer::CreateWindowSizeDependentResources()
 	static const XMVECTORF32 at = { 0.0f, -0.1f, 0.0f, 0.0f };
 	static const XMVECTORF32 up = { 0.0f, 1.0f, 0.0f, 0.0f };
 
-	XMStoreFloat4x4(&m_constantBufferData.view, XMMatrixTranspose(XMMatrixLookAtRH(eye, at, up)));
+	XMStoreFloat4x4(&m_constantBufferData.view, XMMatrixTranspose(XMMatrixLookAtLH(eye, at, up)));
 }
 
 // 프레임당 한 번 호출됩니다. 큐브를 회전하고 모델 및 뷰 매트릭스를 계산합니다.
